@@ -1,0 +1,129 @@
+<!-- notification_list.html -->
+<div xmlns:th="http://www.thymeleaf.org"
+     th:replace="~{layout :: main(~{::pageContent})}">
+    <div th:fragment="pageContent" class="container-fluid">
+
+		<!-- Header: Tiêu đề + mô tả + nút New Announcement to đẹp -->
+		<div class="d-flex justify-content-between align-items-center mb-4">
+		    <div>
+		        <h1 class="fw-bold mb-1">Announcements</h1>
+		        <p class="text-muted mb-0">Manage announcements that appear as banners on your website</p>
+		    </div>
+		    <div>
+		        <a th:href="@{/notification/new}" class="btn btn-primary d-flex align-items-center gap-2">
+		            <i class="bi bi-plus-circle"></i> New&nbsp;Announcement
+		        </a>
+		    </div>
+		</div>
+
+
+        <div class="row">
+			<!-- CỘT TRÁI: Active Announcements -->
+			<div class="col-lg-6 mb-4">
+			    <h5 class="fw-semibold">Active Announcements</h5>
+			    <p class="text-muted small">Currently displayed on your website</p>
+			
+			    <!-- Luôn duyệt notificationsPublished -->
+			    <div th:each="noti : ${notificationsPublished}">
+			        <div class="card mb-3">
+			            <div class="card-body">
+			                <h6 class="card-title fw-semibold text-primary mb-2" th:text="${noti.title}">Title</h6>
+			                <p class="card-text" th:text="${noti.content}">Content</p>
+			                <div class="text-muted small d-flex align-items-center gap-2">
+			                    <i class="bi bi-calendar-event"></i>
+			                    <span th:text="${#temporals.format(noti.postDate, 'MMM dd, yyyy')}">Date</span>
+			                </div>
+			            </div>
+			        </div>
+			    </div>
+			
+			    <div th:if="${#lists.isEmpty(notificationsPublished)}"
+			         class="text-muted fst-italic">
+			        No active announcements found.
+			    </div>
+			</div>
+
+
+            <!-- CỘT PHẢI -->
+            <div class="col-lg-6">
+                <h5 class="fw-semibold mb-1">All Announcements</h5>
+                <p class="text-muted small mb-3">View and manage all your announcements</p>
+
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <form th:action="@{/notification/all}" method="get" class="input-group w-100 me-2">
+                        <input type="text" name="keyword" class="form-control form-control-sm" placeholder="Search…" />
+                        <button class="btn btn-outline-secondary btn-sm" type="submit">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </form>
+                    <form method="get" action="#" class="d-flex">
+                        <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
+                            <option th:value="''" th:selected="${status == null}">All</option>
+                            <option th:value="'Published'" th:selected="${status == 'Published'}">Published</option>
+                            <option th:value="'Scheduled'" th:selected="${status == 'Scheduled'}">Scheduled</option>
+                            <option th:value="'Archived'" th:selected="${status == 'Archived'}">Archived</option>
+                            <option th:value="'Draft'" th:selected="${status == 'Draft'}">Draft</option>
+                        </select>
+                    </form>
+                </div>
+
+                <style>
+                    .custom-table tbody tr {
+                        height: 50px;
+                        vertical-align: middle;
+                    }
+                </style>
+
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle custom-table">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Title</th>
+                                <th>Status</th>
+                                <th style="width: 60px;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="noti : ${notifications}"
+                                th:if="${status == null or noti.status == status}">
+                                <td th:text="${noti.title}">Title</td>
+                                <td>
+						      <span class="badge rounded-pill px-3"
+								      th:text="${noti.status}"
+								      th:classappend="${noti.status == 'Published'} ? 'bg-success-subtle text-success fw-medium' :
+								                      (${noti.status == 'Scheduled'} ? 'bg-primary-subtle text-primary fw-medium' :
+								                      (${noti.status == 'Expired'} ? 'bg-secondary-subtle text-secondary fw-medium' : ''))">
+								</span>
+
+                                </td>
+                                <td class="text-end">
+                                    <div class="dropdown">
+                                        <a href="#" data-bs-toggle="dropdown" class="text-body fs-6">
+                                            <i class="bi bi-three-dots"></i>
+                                        </a>
+                                        <ul class="dropdown-menu dropdown-menu-end">
+                                            <li><a class="dropdown-item" th:href="@{'/notification/view/' + ${noti.id}}">View</a></li>
+                                            <li><a class="dropdown-item" th:href="@{'/notification/edit/' + ${noti.id}}">Edit</a></li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li>
+                                                <a class="dropdown-item text-danger"
+                                                   th:href="@{'/notification/delete/' + ${noti.id}}"
+                                                   onclick="return confirm('Delete this announcement?');">
+                                                    Delete
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <tr th:if="${#lists.isEmpty(notifications)}">
+                                <td colspan="3" class="text-center text-muted">No announcements found</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

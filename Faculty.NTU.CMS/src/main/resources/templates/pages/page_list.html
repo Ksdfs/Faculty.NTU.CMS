@@ -1,0 +1,198 @@
+<div xmlns:th="http://www.thymeleaf.org"
+     th:replace="~{layout :: main(~{::pageContent})}">
+
+    <!-- ========== NỘI DUNG TRANG PAGE LIST (fragment) ========== -->
+    <div th:fragment="pageContent" class="container-fluid">
+
+        <!-- CSS riêng cho bảng Page List -->
+        <style>
+            /* Giữ chiều cao cố định 50 px cho mỗi hàng dữ liệu */
+            .page-table tbody tr { height: 50px; }
+
+            /* Căn giữa nội dung theo chiều dọc cho đẹp mắt */
+            .page-table thead th,
+            .page-table tbody td { vertical-align: middle; }
+        </style>
+
+        <!-- Tiêu đề + nút New Page -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 class="h4 fw-bold mb-1">Pages</h1>
+                <p class="text-muted mb-0">
+                    Manage information pages for your faculty website
+                </p>
+            </div>
+
+            <a th:href="@{/page/new}" class="btn btn-primary d-flex align-items-center gap-2">
+                <i class="bi bi-plus-circle"></i> New Page
+            </a>
+        </div>
+
+        <!-- Card chứa bảng -->
+        <div class="card shadow-sm">
+            <div class="card-body">
+
+                <div class="mb-3">
+                    <h2 class="h6 fw-semibold mb-1">All Pages</h2>
+                    <p class="text-muted small mb-0">
+                        View and manage all your information pages
+                    </p>
+                </div>
+
+                <!-- Thanh Search + Filter -->
+                <div class="row align-items-center g-2 mb-3">
+                    <div class="col-md-6">
+                        <form th:action="@{/page/all}" method="get" class="input-group">
+							<input id="liveSearchInput" type="search" name="keyword" th:value="${keyword}" class="form-control" placeholder="Search pages…">
+						    <button class="btn btn-outline-secondary" type="submit">
+						        <i class="bi bi-search"></i>
+						    </button>
+						</form>
+
+                    </div>
+                    <div class="col-md-6 d-flex justify-content-md-end gap-2">
+                        <button class="btn btn-outline-secondary btn-sm">
+                            Filter <i class="bi bi-chevron-down ms-1"></i>
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm">
+                            Sort <i class="bi bi-chevron-down ms-1"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Bảng dữ liệu -->
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0 page-table">
+                        <thead class="table-light">
+                        <tr>
+                            <th>Title</th>
+                            <th>URL</th>
+                            <th>Last Updated</th>
+                            <th>Status</th>
+                            <th style="width: 80px;">Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="page : ${pages}">
+                            <td th:text="${page.title}">Page title</td>
+                            <td class="text-muted" th:text="${page.url}">/url</td>
+                            <td th:text="${page.lastUpdated}">2025‑04‑17</td>
+                            <td>
+                                <span class="badge rounded-pill px-3 py-1"
+                                      th:text="${page.status}"
+                                      th:classappend="${page.status} == 'Published'
+                                                  ? 'bg-success-subtle text-success fw-medium'
+                                                  : 'bg-warning-subtle text-warning fw-medium'">
+                                    Published
+                                </span>
+                            </td>
+                            <!-- Nút ba chấm -->
+                            <td class="text-center">
+                                <div class="dropdown">
+                                    <button class="btn btn-link p-0 text-dark"
+                                            data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="bi bi-three-dots"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        <li>
+                                            <a class="dropdown-item"
+                                               th:href="@{'/page/view/' + ${page.id}}">View</a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item"
+                                               th:href="@{'/page/edit/' + ${page.id}}">Edit</a>
+                                        </li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li>
+                                            <a class="dropdown-item text-danger"
+                                               th:href="@{'/page/delete/' + ${page.id}}"
+                                               onclick="return confirm('Delete?');">
+                                                Delete
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- Hiển thị khi danh sách rỗng -->
+                        <tr th:if="${#lists.isEmpty(pages)}">
+                            <td colspan="5" class="text-center text-muted">No pages found</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+    
+    <!-- /fragment -->
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('liveSearchInput');
+        const tableBody = document.querySelector('.page-table tbody');
+
+        if (!searchInput || !tableBody) {
+            console.error('Không tìm thấy input hoặc tbody!');
+            return;
+        }
+
+        let timeout = null;
+
+        searchInput.addEventListener('input', function() {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => {
+                const keyword = searchInput.value.trim();
+                fetch(`/page/search?keyword=${encodeURIComponent(keyword)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        tableBody.innerHTML = '';
+                        if (data.length === 0) {
+                            tableBody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No pages found</td></tr>';
+                            return;
+                        }
+
+                        data.forEach(page => {
+                            const statusClass = page.status === 'Published'
+                                ? 'bg-success-subtle text-success fw-medium'
+                                : 'bg-warning-subtle text-warning fw-medium';
+
+                            const row = `
+                                <tr>
+                                    <td>${page.title}</td>
+                                    <td class="text-muted">${page.url}</td>
+                                    <td>${page.lastUpdated}</td>
+                                    <td><span class="badge rounded-pill px-3 py-1 ${statusClass}">${page.status}</span></td>
+                                    <td class="text-center">
+                                        <div class="dropdown">
+                                            <button class="btn btn-link p-0 text-dark" data-bs-toggle="dropdown">
+                                                <i class="bi bi-three-dots"></i>
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-end">
+                                                <li><a class="dropdown-item" href="/page/view/${page.id}">View</a></li>
+                                                <li><a class="dropdown-item" href="/page/edit/${page.id}">Edit</a></li>
+                                                <li><hr class="dropdown-divider"></li>
+                                                <li>
+                                                    <a class="dropdown-item text-danger" href="/page/delete/${page.id}" onclick="return confirm('Delete?');">
+                                                        Delete
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </td>
+                                </tr>
+                            `;
+                            tableBody.insertAdjacentHTML('beforeend', row);
+                        });
+                    });
+            }, 300); // chờ 300ms mới gửi request để tránh spam
+        });
+    });
+</script>
+    
+    
+</div>
+	
