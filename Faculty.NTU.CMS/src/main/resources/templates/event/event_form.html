@@ -1,0 +1,79 @@
+<!-- src/main/resources/templates/event/event_form.html -->
+<div xmlns:th="http://www.thymeleaf.org"
+     th:replace="~{layout :: main(~{::pageContent})}">
+
+  <div th:fragment="pageContent" class="container py-4">
+
+    <h2 class="mb-4"
+        th:text="${event.id != null} ? 'Edit Event' : 'Create New Event'">
+      Create New Event
+    </h2>
+
+    <form th:action="@{/event/save}" th:object="${event}" method="post" class="row g-3">
+      <!-- Hidden ID khi edit -->
+      <input type="hidden" th:if="${event.id != null}" th:field="*{id}" />
+
+      <!-- Tiêu đề sự kiện -->
+      <div class="col-md-12">
+        <label for="title" class="form-label">Title</label>
+        <input type="text" th:field="*{title}" id="title" class="form-control"
+               placeholder="Nhập tiêu đề" required />
+      </div>
+
+      <!-- Mô tả sự kiện -->
+      <div class="col-md-12">
+        <label for="description" class="form-label">Description</label>
+        <textarea th:field="*{description}" id="description" class="form-control"
+                  rows="5" placeholder="Nhập mô tả"></textarea>
+      </div>
+
+      <!-- Ngày & Giờ -->
+      <div class="col-md-3">
+        <label for="startDate" class="form-label">Start Date</label>
+        <input type="date" th:field="*{startDate}" id="startDate" class="form-control" required />
+      </div>
+      <div class="col-md-3">
+        <label for="startTime" class="form-label">Start Time</label>
+        <input type="time" th:field="*{startTime}" id="startTime" class="form-control" />
+      </div>
+      <div class="col-md-3">
+        <label for="endDate" class="form-label">End Date</label>
+        <input type="date" th:field="*{endDate}" id="endDate" class="form-control" />
+      </div>
+      <div class="col-md-3">
+        <label for="endTime" class="form-label">End Time</label>
+        <input type="time" th:field="*{endTime}" id="endTime" class="form-control" />
+      </div>
+
+      <!-- Location, Organizer, Status -->
+      <div class="col-md-4">
+        <label for="location" class="form-label">Location</label>
+        <input type="text" th:field="*{location}" id="location" class="form-control"
+               placeholder="Nhập địa điểm" />
+      </div>
+      <div class="col-md-4">
+        <label for="organizer" class="form-label">Organizer</label>
+        <input type="text" th:field="*{organizer}" id="organizer" class="form-control"
+               placeholder="Nhập người tổ chức" />
+      </div>
+      <div class="col-md-4">
+        <label for="status" class="form-label">Status</label>
+        <select th:field="*{status}" id="status" class="form-select" required>
+          <option value="" disabled th:if="${event.status == null}" selected>
+            -- Chọn trạng thái --
+          </option>
+          <option value="Scheduled">Scheduled</option>
+          <option value="Completed">Completed</option>
+          <option value="Canceled">Canceled</option>
+        </select>
+      </div>
+
+      <!-- Nút hành động -->
+      <div class="col-12">
+        <button type="submit" class="btn btn-primary">Save</button>
+        <a th:href="@{/event/all}" class="btn btn-secondary ms-2">Cancel</a>
+      </div>
+    </form>
+
+  </div>
+</div>

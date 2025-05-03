@@ -1,0 +1,364 @@
+
+<div xmlns:th="http://www.thymeleaf.org"
+     th:replace="~{layout :: main(~{::pageContent})}">
+  <div th:fragment="pageContent">
+
+    <!-- HEADER -->
+    <div class="container-fluid mb-4">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <h1 class="h2 fw-bold">Events</h1>
+          <p class="text-muted mb-0">Manage events and activities for your faculty</p>
+        </div>
+        <a th:href="@{/event/new}" class="btn btn-primary">
+          <i class="bi bi-plus-lg me-1"></i> New Event
+        </a>
+      </div>
+    </div>
+
+    <div class="container-fluid">
+
+      <!-- Sub‑header with toggle buttons -->
+      <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+        <div>
+          <h4 class="fw-bold mb-1">All Events</h4>
+          <p class="text-muted mb-0">View and manage upcoming and past events</p>
+        </div>
+        <div class="d-flex gap-2">
+          <button id="btnCalendar" class="btn toggle-view-btn btn-outline-secondary rounded-pill">
+            <i class="bi bi-calendar"></i> Calendar
+          </button>
+          <button id="btnList" class="btn toggle-view-btn btn-outline-secondary rounded-pill">
+            <i class="bi bi-list"></i> List
+          </button>
+        </div>
+      </div>
+
+      <!-- Search & Filters -->
+	<form th:action="@{/event/all}" method="get" class="row g-2 align-items-end mb-4">
+	  <!-- 1. Search bên trái -->
+	  <div class="col-auto">
+	    <div class="input-group">
+	      <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+	      <input
+	        id="keywordInput"  
+	        name="keyword"
+	        type="text"
+	        class="form-control"
+	        placeholder="Tìm sự kiện..."
+	        th:value="${keyword}">
+	    </div>
+	  </div>
+	
+	  <!-- 2. Phần lọc bắt đầu từ đây, được đẩy sang phải -->
+	  <div class="col-auto ms-auto">
+	    <label for="statusFilter" class="form-label">Trạng thái</label>
+	    <select id="statusFilter" name="status" class="form-select">
+	      <option value="">-- Tất cả --</option>
+	      <option value="Upcoming"  th:selected="${status=='Upcoming'}">Upcoming</option>
+	      <option value="Ongoing"   th:selected="${status=='Ongoing'}">Ongoing</option>
+	      <option value="Past"      th:selected="${status=='Past'}">Past</option>
+	      <option value="Cancelled" th:selected="${status=='Cancelled'}">Cancelled</option>
+	    </select>
+	  </div>
+	
+	  <div class="col-auto">
+	    <label for="fromDate" class="form-label">Từ ngày</label>
+	    <input
+	      id="fromDate"
+	      name="fromDate"
+	      type="date"
+	      class="form-control"
+	      th:value="${fromDate}">
+	  </div>
+	
+	  <div class="col-auto">
+	    <label for="toDate" class="form-label">Đến ngày</label>
+	    <input
+	      id="toDate"
+	      name="toDate"
+	      type="date"
+	      class="form-control"
+	      th:value="${toDate}">
+	  </div>
+	
+	  <div class="col-auto">
+	    <button type="submit" class="btn btn-primary">Lọc</button>
+	  </div>
+	</form>
+
+      
+
+      <!-- Calendar View -->
+      <div id="calendarView" class="card shadow-sm border-0 mb-4">
+        <div class="card-body p-2">
+          <div id="calendar" class="bg-white rounded" style="min-height: 650px;"></div>
+        </div>
+      </div>
+
+      <!-- List View -->
+      <div id="listView" class="card shadow-sm border-0" style="display:none;">
+        <div class="card-body table-responsive">
+
+        
+          <table class="table align-middle mb-0" style="min-width: 1000px;">
+            <thead class="table-light">
+              <tr>
+                <th style="width:25%;">Event</th>
+                <th style="width:25%;">Date &amp; Time</th>
+                <th style="width:20%;">Location</th>
+                <th style="width:20%;">Organizer</th>
+                <th style="width:10%;">Actions</th>
+              </tr>
+            </thead>
+            <tbody th:each="event : ${events}">
+              <tr>
+                <td>
+                  <strong th:text="${event.title}">Event Title</strong>
+                </td>
+                <td>
+                  <i class="bi bi-calendar"></i>
+                  <span th:text="${#temporals.format(event.startDate,'MMMM d, yyyy')}">Apr 15, 2023</span>,
+                  <span th:text="${#temporals.format(event.startTime,'h:mm a')}">10:00 AM</span> – 
+                  <span th:text="${#temporals.format(event.endTime,'h:mm a')}">12:00 PM</span>
+                </td>
+                <td>
+                  <i class="bi bi-geo-alt"></i>
+                  <span th:text="${event.location}">Conference Room A</span>
+                </td>
+                <td>
+                  <i class="bi bi-people"></i>
+                  <span th:text="${event.organizer}">Dean’s Office</span>
+                </td>
+				<!-- HTML: dropdown trong cột Actions -->
+				<td class="align-middle">
+				  <div class="dropdown position-static" data-bs-boundary="viewport">
+				    <button
+				      class="btn btn-sm dropdown-toggle text-body fs-6 p-0"
+				      type="button"
+				      id="dropdownMenuButton__${event.id}"
+				      data-bs-toggle="dropdown"
+				      aria-expanded="false">
+				      <i class="bi bi-three-dots"></i>
+				    </button>
+				    <ul
+				      class="dropdown-menu dropdown-menu-end"
+				      aria-labelledby="dropdownMenuButton__${event.id}">
+				      <li>
+				        <a class="dropdown-item" th:href="@{/event/edit/{id}(id=${event.id})}">
+				          <i class="bi bi-pencil me-2"></i>Edit
+				        </a>
+				      </li>
+				      <li><hr class="dropdown-divider"></li>
+				      <li>
+				        <a class="dropdown-item text-danger"
+				           th:href="@{/event/delete/{id}(id=${event.id})}"
+				           onclick="return confirm('Are you sure?');">
+				          <i class="bi bi-trash me-2"></i>Delete
+				        </a>
+				      </li>
+				    </ul>
+				  </div>
+				</td>
+
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+
+
+<!-- JS Khởi tạo Calendar & Toggle View -->
+<!-- JS Khởi tạo Calendar & Toggle View -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  // --- 1. Các phần tử cần dùng ---
+  const searchInput = document.getElementById('keywordInput');
+  const calendarEl  = document.getElementById('calendar');
+  const filterForm  = document.getElementById('filterForm');
+
+  // --- 2. Khởi tạo FullCalendar ---
+  const calendar = new FullCalendar.Calendar(calendarEl, {
+    initialView: 'dayGridMonth',
+    locale: 'vi',
+    height: 'auto',
+    fixedWeekCount: false,
+    headerToolbar: { left: 'prev,next', center: 'title', right: '' },
+    noEventsContent: 'Không có sự kiện nào',
+    events: function(fetchInfo, successCallback, failureCallback) {
+      const url = '/event/api'
+                + '?keyword=' + encodeURIComponent(searchInput.value);
+      fetch(url)
+        .then(r => r.json())
+        .then(data => {
+          const displayEvents = data.map(evt => {
+            const startStr = evt.start;
+            const dt       = new Date(startStr);
+            dt.setDate(dt.getDate() + 1);
+            const endStr   = dt.toISOString().slice(0,10);
+            return {
+              title: evt.title,
+              start: startStr,
+              end:   endStr,
+              extendedProps: { realEnd: evt.end }
+            };
+          });
+          successCallback(displayEvents);
+        })
+        .catch(err => failureCallback(err));
+    }
+  });
+  calendar.render();
+
+  // --- 3. Live-search + Auto-submit form (debounce) ---
+  let debounceTimer;
+  searchInput.addEventListener('input', function() {
+    // a) refetch calendar
+    calendar.refetchEvents();
+    // b) submit form sau 300ms
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      filterForm.submit();
+    }, 300);
+  });
+
+  // --- 4. Toggle Calendar/List ---
+  const cv   = document.getElementById('calendarView');
+  const lv   = document.getElementById('listView');
+  const btnC = document.getElementById('btnCalendar');
+  const btnL = document.getElementById('btnList');
+
+  function setActive(showCal) {
+    cv.style.display = showCal ? 'block' : 'none';
+    lv.style.display = showCal ? 'none'  : 'block';
+    btnC.classList.toggle('btn-primary', showCal);
+    btnC.classList.toggle('btn-outline-secondary', !showCal);
+    btnL.classList.toggle('btn-primary', !showCal);
+    btnL.classList.toggle('btn-outline-secondary', showCal);
+  }
+
+  setActive(true);
+  btnC.addEventListener('click', () => setActive(true));
+  btnL.addEventListener('click', () => setActive(false));
+});
+</script>
+
+
+
+
+<style>
+/* 1. Cho mỗi hàng (trong tbody) cao 50px */
+.table tbody tr {
+  height: 70px;
+  vertical-align: middle; /* canh giữa theo chiều dọc nếu muốn */
+}
+
+/* 2. Giảm độ đậm của chữ ở cột Event (cột đầu) */
+.table tbody tr > td:first-child strong {
+  font-weight: 500; /* tương đương fw-medium */
+}
+/* Ẩn mũi tên của tất cả các dropdown-toggle */
+.dropdown-toggle::after {
+  display: none !important;
+}
+
+.table-responsive {
+  overflow: visible !important;
+}
+
+  /* ==== 1. Table collapse để xóa grid lines mặc định ==== */
+  .fc .fc-scrollgrid table {
+    border-collapse: collapse !important;
+    border-spacing: 0 !important;
+    width: 100%;
+  }
+  .fc .fc-scrollgrid th,
+  .fc .fc-scrollgrid td {
+    border: none !important;
+    padding: 0 !important;
+  }
+
+  /* ==== 2. Khung ô ngày (frame) chịu border, margin, padding và chứa event ==== */
+  .fc-daygrid-day-frame {
+    margin: 4px !important;
+    border: 1px solid rgba(0,0,0,0.1) !important;
+    border-radius: 8px !important;
+    padding: 8px !important;
+    background-color: #fff !important;
+    box-shadow: none !important;
+  }
+  .fc-daygrid-day-frame:hover {
+    background-color: #f1f5f9 !important;
+  }
+
+  /* ==== 3. Highlight hôm nay ==== */
+  .fc .fc-day-today .fc-daygrid-day-frame {
+    background-color: #e0f2fe !important;
+    box-shadow: inset 0 0 0 2px #3b82f6 !important;
+  }
+
+  /* ==== 4. Chữ số ngày và header luôn đen, không gạch chân ==== */
+  .fc .fc-daygrid-day-number,
+  .fc .fc-col-header-cell-cushion,
+  .fc .fc-col-header-cell-cushion a {
+    color: #000 !important;
+    text-decoration: none !important;
+    font-weight: 500;
+  }
+
+  /* ==== 5. Chữ “All Events” cùng cỡ với “Events” ==== */
+  h4.fw-bold.mb-1 {
+    font-size: 1.5rem;
+    font-weight: 600;
+  }
+
+  /* ==== 6. Style chung cho các event block ==== */
+  .fc .fc-daygrid-event .fc-event-main {
+  /* nền nhạt */
+  background-color: rgb(239 246 255 / var(--tw-bg-opacity, 1)) !important;
+  /* chữ xanh đậm */
+  color: rgb(29 78 216 / var(--tw-text-opacity, 1)) !important;
+  padding: 2px 6px !important;
+  font-size: 0.875rem;
+  border: none !important;
+  }
+
+  /* ==== 7. Bo góc trái cho ô đầu (start) ==== */
+  .fc .fc-daygrid-event.fc-event-start .fc-event-main {
+    border-top-left-radius: 0.25rem !important;
+    border-bottom-left-radius: 0.25rem !important;
+  }
+
+  /* ==== 8. Bo góc phải cho ô cuối (end) ==== */
+  .fc .fc-daygrid-event.fc-event-end .fc-event-main {
+    border-top-right-radius: 0.25rem !important;
+    border-bottom-right-radius: 0.25rem !important;
+  }
+
+  /* ==== 9. Phần giữa (span) không bo góc ==== */
+  .fc .fc-daygrid-event:not(.fc-event-start):not(.fc-event-end) .fc-event-main {
+    border-radius: 0 !important;
+    margin-left: 2px !important;
+    margin-right: 2px !important;
+  }
+  .fc .fc-event {
+  border: none !important;
+  
+  .table tbody td:last-child { 
+  padding-left: 1rem; 
+}
+}
+</style>
+
+
+
+
+
+
+

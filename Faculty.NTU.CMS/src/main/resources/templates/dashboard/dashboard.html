@@ -1,0 +1,172 @@
+<!-- File: src/main/resources/templates/dashboard/dashboard.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi"
+      th:replace="~{layout :: main(~{::body})}">
+<head>
+  <title>Dashboard | Faculty.NTU.CMS</title>
+</head>
+<body>
+  <div class="container-fluid p-4">
+    <!-- Header -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
+      <div>
+        <h1 class="h3 mb-1">Dashboard</h1>
+        <small class="text-muted">Welcome to Faculty.NTU.CMS – Manage your content efficiently</small>
+      </div>
+      <div class="mt-3 mt-md-0">
+        <a th:href="@{/post/new}" class="btn btn-primary me-2">
+          <i class="bi bi-plus-lg"></i> New Post
+        </a>
+        <a th:href="@{/page/new}" class="btn btn-outline-secondary">
+          <i class="bi bi-plus-lg"></i> New Page
+        </a>
+      </div>
+    </div>
+
+    <!-- Statistics cards -->
+    <div class="row g-3 mb-4">
+      <!-- Total Pages -->
+      <div class="col-sm-6 col-xl-3">
+        <div class="card shadow-sm h-100">
+          <div class="card-body d-flex justify-content-between align-items-center">
+            <div>
+              <div class="text-uppercase text-muted small">Total Pages</div>
+              <div class="h2 mb-1" th:text="${totalPages}">0</div>
+              <div class="small text-muted"
+                   th:text="'+' + ${newPagesThisMonth} + ' pages added this month'">
+                +0 pages added this month
+              </div>
+            </div>
+            <i class="bi bi-file-earmark-text-fill fs-1 text-primary"></i>
+          </div>
+        </div>
+      </div>
+      <!-- Total Posts -->
+      <div class="col-sm-6 col-xl-3">
+        <div class="card shadow-sm h-100">
+          <div class="card-body d-flex justify-content-between align-items-center">
+            <div>
+              <div class="text-uppercase text-muted small">Total Posts</div>
+              <div class="h2 mb-1" th:text="${totalPosts}">0</div>
+              <div class="small text-muted"
+                   th:text="'+' + ${newPostsThisMonth} + ' posts added this month'">
+                +0 posts added this month
+              </div>
+            </div>
+            <i class="bi bi-book fs-1 text-primary"></i>
+          </div>
+        </div>
+      </div>
+      <!-- Announcements -->
+      <div class="col-sm-6 col-xl-3">
+        <div class="card shadow-sm h-100">
+          <div class="card-body d-flex justify-content-between align-items-center">
+            <div>
+              <div class="text-uppercase text-muted small">Announcements</div>
+              <div class="h2 mb-1" th:text="${totalAnnouncements}">0</div>
+              <div class="small text-muted"
+                   th:text="${activeAnnouncements} + ' active announcements'">
+                0 active announcements
+              </div>
+            </div>
+            <i class="bi bi-chat-left-text-fill fs-1 text-primary"></i>
+          </div>
+        </div>
+      </div>
+      <!-- Upcoming Events -->
+      <div class="col-sm-6 col-xl-3">
+        <div class="card shadow-sm h-100">
+          <div class="card-body d-flex justify-content-between align-items-center">
+            <div>
+              <div class="text-uppercase text-muted small">Upcoming Events</div>
+              <div class="h2 mb-1" th:text="${upcomingEventsCount}">0</div>
+              <div class="small text-muted"
+                   th:text="'Next event in ' + ${daysToNextEvent} + ' days'">
+                Next event in 0 days
+              </div>
+            </div>
+            <i class="bi bi-calendar-event fs-1 text-primary"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Activity & Quick Actions -->
+    <div class="row g-4">
+      <!-- Recent Activity -->
+      <div class="col-lg-8">
+        <div class="card shadow-sm">
+          <div class="card-header bg-white">
+			<div class="card-header bg-white d-flex justify-content-between align-items-center border-0">
+			  <h5 class="mb-0">Recent Activity</h5>
+			  <a href="/dashboard/activity_all" class="btn btn-sm text-primary border-0 bg-transparent shadow-none p-0">Xem tất cả</a>
+
+			</div>
+
+
+          </div>
+	<ul class="list-group list-group-flush">
+	  <li class="list-group-item d-flex justify-content-between align-items-center"
+	      th:each="act : ${recentActivities}">
+	    <div class="d-flex align-items-center">
+	      <!-- động: bi + act.icon + các class còn lại -->
+	      <i th:class="'bi bi-' + ${act.icon} + ' fs-4 text-primary me-3'"></i>
+	      <div>
+	        <div th:text="${act.action}">Activity text</div>
+	        <small class="text-muted"
+	               th:text="${#temporals.format(act.time, 'dd/MM/yyyy HH:mm')}">
+	          02/05/2025 14:30
+	        </small>
+	      </div>
+	    </div>
+		<div class="d-flex gap-2">
+		  <a th:href="@{${act.url}}" 
+		     class="activity-view text-dark text-decoration-none px-2 py-1 rounded hover:bg-secondary-subtle">View</a>
+		
+		  <a th:href="@{'/activity/delete/' + ${act.id}}" 
+		     class="activity-delete text-danger text-decoration-none px-2 py-1 rounded hover:bg-danger-subtle"
+		     onclick="return confirm('Bạn có chắc chắn muốn xóa hoạt động này?');">
+		     Delete
+		  </a>
+		</div>
+
+
+
+	  </li>
+	</ul>
+
+
+
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="col-lg-4">
+        <div class="card shadow-sm">
+          <div class="card-header bg-white">
+            <h5 class="mb-0">Quick Actions</h5>
+          </div>
+          <div class="list-group list-group-flush">
+            <a th:href="@{/post/new}"
+               class="list-group-item list-group-item-action">
+              <i class="bi bi-plus-lg me-2"></i> Create New Post
+            </a>
+            <a th:href="@{/event/new}"
+               class="list-group-item list-group-item-action">
+              <i class="bi bi-calendar-event me-2"></i> Schedule Event
+            </a>
+            <a th:href="@{/notification/new}"
+               class="list-group-item list-group-item-action">
+              <i class="bi bi-chat-left-text me-2"></i> Add Announcement
+            </a>
+            <a th:href="@{/user/list}"
+               class="list-group-item list-group-item-action">
+              <i class="bi bi-people me-2"></i> Manage Users
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

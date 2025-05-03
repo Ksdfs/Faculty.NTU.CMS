@@ -1,0 +1,108 @@
+<div xmlns:th="http://www.thymeleaf.org"
+     th:replace="~{layout :: main(~{::pageContent})}">
+
+  <div th:fragment="pageContent" class="container py-4">
+
+    <!-- Header: Recent Activities + Export/Refresh -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h3 class="fw-bold mb-1">Recent Activities</h3>
+        <p class="text-muted mb-0">View and filter all system activities</p>
+      </div>
+      <div>
+        <a href="#" class="btn btn-outline-secondary me-2">
+          <i data-feather="refresh-cw"></i>
+        </a>
+        <a href="#" class="btn btn-outline-primary">
+          <i data-feather="download"></i> Export
+        </a>
+      </div>
+    </div>
+
+    <!-- Activity Log title -->
+    <div class="mb-3">
+      <h5 class="fw-semibold mb-1">Activity Log</h5>
+      <p class="text-muted mb-3">Track all changes and actions in the system</p>
+    </div>
+
+    <!-- Filters -->
+    <div class="row g-2 mb-4">
+      <div class="col-md-4">
+        <input type="text" class="form-control" placeholder="Search activities...">
+      </div>
+      <div class="col-md-3">
+        <input type="date" class="form-control" placeholder="Select date">
+      </div>
+      <div class="col-md-2">
+        <select class="form-select">
+          <option>All Types</option>
+          <option>Edit</option>
+          <option>Create</option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <select class="form-select">
+          <option>All Users</option>
+          <option>Admin</option>
+          <option>User</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <ul class="nav nav-tabs mb-4">
+      <li class="nav-item"><a class="nav-link active" href="#">All</a></li>
+      <li class="nav-item"><a class="nav-link" href="#">Content</a></li>
+      <li class="nav-item"><a class="nav-link" href="#">Users</a></li>
+      <li class="nav-item"><a class="nav-link" href="#">Settings</a></li>
+      <li class="nav-item"><a class="nav-link" href="#">System</a></li>
+    </ul>
+
+    <!-- Activity blocks -->
+    <div th:each="activity : ${activities}" class="card mb-3 shadow-sm">
+      <div class="card-body d-flex justify-content-between align-items-start">
+        <div class="d-flex">
+          <!-- Icon -->
+          <div class="me-3">
+            <div class="rounded-circle bg-light d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+              <i th:attr="data-feather=${activity.icon}" class="text-primary"></i>
+            </div>
+          </div>
+
+          <!-- Content -->
+          <div>
+            <div>
+              <strong th:text="${activity.action}">Activity title</strong>
+            </div>
+            <div class="text-muted small mb-1" th:text="${activity.url}">URL</div>
+            <!-- Nếu bạn có user sau này thì mở comment dòng dưới -->
+            <!-- <div class="small text-muted" th:text="${activity.user}">User</div> -->
+          </div>
+        </div>
+
+        <!-- Right side: label + time + action -->
+        <div class="text-end">
+          <div>
+            <span class="badge rounded-pill"
+                  th:classappend="${activity.action.contains('Edit')} ? 'bg-primary' : 'bg-success'"
+                  th:text="${activity.icon}">
+              Action
+            </span>
+            <span class="text-muted small ms-2"
+                  th:text="${#temporals.format(activity.time, 'dd/MM/yyyy HH:mm')}">
+              Time
+            </span>
+          </div>
+          <div class="mt-2">
+            <a th:href="${activity.url}" class="btn btn-sm btn-outline-secondary">Show More</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Feather icons -->
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script>feather.replace()</script>
+
+  </div>
+</div>
