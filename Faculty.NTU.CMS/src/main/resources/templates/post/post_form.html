@@ -1,50 +1,119 @@
 <div xmlns:th="http://www.thymeleaf.org"
      th:replace="~{layout :: main(~{::pageContent})}">
-    <div th:fragment="pageContent" class="container py-4">
-
-        <h2 class="mb-4" th:text="${post.id != null} ? 'Edit Post' : 'Create New Post'">New Post</h2>
-
-        <form th:action="@{/post/save}" th:object="${post}" method="post" class="row g-3">
-            <input type="hidden" th:if="${post.id != null}" th:field="*{id}" />
-
-            <div class="col-md-6">
-                <label class="form-label">Title</label>
-                <input type="text" th:field="*{title}" class="form-control" required>
+    <div th:fragment="pageContent">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="d-flex align-items-center">
+                <a href="javascript:history.back()" class="btn btn-outline-secondary btn-sm me-2">
+                    <i class="bi bi-arrow-left"></i>
+                </a>
+                <h4 th:text="${post.id != null} ? 'Edit Post' : 'Create New Post'">Create New Post</h4>
             </div>
-
-            <div class="col-md-6">
-                <label class="form-label">Category</label>
-                <select th:field="*{category}" class="form-select" required>
-				    <option th:each="cat : ${categories}"
-				            th:value="${cat.id}"
-				            th:text="${cat.name}">
-				    </option>
-				</select>
-
+            <div>
+                <button class="btn btn-outline-secondary me-2" type="submit" form="postForm" name="status" value="Draft">Save as Draft</button>
+                <button class="btn btn-primary" type="submit" form="postForm" name="status" value="Published">Publish</button>
             </div>
+        </div>
 
-            <div class="col-md-6">
-                <label class="form-label">Author</label>
-                <input type="text" th:field="*{author}" class="form-control" required>
-            </div>
+        <ul class="nav nav-tabs mb-4">
+            <li class="nav-item">
+                <a class="nav-link active" href="#">Content</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link disabled" href="#">SEO</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link disabled" href="#">Settings</a>
+            </li>
+        </ul>
 
-            <div class="col-md-6">
-                <label class="form-label">Post Date</label>
-                <input type="date" th:field="*{postDate}" class="form-control" required>
-            </div>
+        <form id="postForm" th:action="@{/post/save}" th:object="${post}" method="post">
+            <input type="hidden" th:field="*{id}" th:if="${post.id != null}" />
 
-            <div class="col-md-6">
-                <label class="form-label">Status</label>
-                <select th:field="*{status}" class="form-select">
-                    <option value="Draft">Draft</option>
-                    <option value="Published">Published</option>
-                    <option value="Pending Review">Pending Review</option>
-                </select>
-            </div>
+            <div class="row">
+                <!-- Main Content -->
+                <div class="col-lg-8 mb-4">
+                    <div class="card p-4">
+                        <h5 class="mb-3">Post Content</h5>
+                        <p class="text-muted">Enter the main content for your post</p>
 
-            <div class="col-12">
-                <button type="submit" class="btn btn-primary" th:text="${post.id != null} ? 'Update' : 'Save'">Save</button>
-                <a th:href="@{/post/all}" class="btn btn-secondary">Cancel</a>
+                        <div class="mb-3">
+                            <label class="form-label">Title</label>
+                            <input type="text" th:field="*{title}" class="form-control" placeholder="Enter post title" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Excerpt</label>
+                            <textarea th:field="*{excerpt}" class="form-control" rows="3" placeholder="Enter a short excerpt or summary"></textarea>
+                            <div class="form-text">This will be displayed on post listings and search results</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Content</label>
+                            <textarea th:field="*{content}" class="form-control" rows="8" placeholder="Write your post content here..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sidebar -->
+                <div class="col-lg-4">
+                    <div class="card p-4 mb-4">
+                        <h6 class="mb-3">Category</h6>
+                        <select th:field="*{category.id}" class="form-select" required>
+                            <option value="">Select category</option>
+                            <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}"></option>
+                        </select>
+                    </div>
+					<!-- Anh chinh -->
+					<div class="card p-4 mb-4">
+					  <h6 class="mb-2">Featured Image</h6>
+					  <p class="text-muted small">Upload a featured image for your post</p>
+					
+					  <label class="upload-box w-100 text-center py-4 border border-2 border-dashed rounded" for="imageUpload">
+					    <div class="text-secondary">
+					      <i class="bi bi-image fs-1"></i>
+					      <p class="mb-1">Drag and drop or click to upload</p>
+					      <small class="text-muted">PNG, JPG or GIF up to 2MB</small>
+					    </div>
+					    <input id="imageUpload" name="imageFile" type="file" accept=\"image/png, image/jpeg, image/gif\" style=\"display: none;\" />
+					  </label>
+					
+					  <button type="button" class="btn btn-outline-secondary mt-3 w-100">Upload Image</button>
+					</div>
+					<div class="card p-4 mb-4">
+					    <h6 class="mb-3">Post Status</h6>
+					    <select th:field="*{status}" class="form-select" required>
+					        <option value="Draft">Draft</option>
+					        <option value="Published">Published</option>
+					    </select>
+					</div>
+					
+					<!--Anh phu  -->
+					<div class="card p-4 mb-4">
+					  <h6 class="mb-2">Thumbnail Image</h6>
+					  <p class="text-muted small">Upload a thumbnail image for your post</p>
+					  <label class="upload-box w-100 text-center py-4 border border-2 border-dashed rounded" for="thumbnailUpload">
+					    <div class="text-secondary">
+					      <i class="bi bi-image fs-1"></i>
+					      <p class="mb-1">Drag and drop or click to upload</p>
+					      <small class="text-muted">PNG, JPG or GIF up to 2MB</small>
+					    </div>
+					    <input id="thumbnailUpload" name="thumbnailFiles" type="file" multiple />
+					  </label>
+					
+					  <button type="button" class="btn btn-outline-secondary mt-3 w-100">Upload Image</button>
+					</div>
+					
+
+                    <div class="card p-4 mb-4">
+                        <h6 class="mb-3">Tags</h6>
+                        <input type="text" th:field="*{tags}" class="form-control" placeholder="Enter tags separated by commas">
+                    </div>
+
+                    <div class="card p-4 mb-4">
+                        <h6 class="mb-3">Post Date</h6>
+                        <input type="date" class="form-control" th:field="*{postDate}" />
+                    </div>
+                </div>
             </div>
         </form>
     </div>

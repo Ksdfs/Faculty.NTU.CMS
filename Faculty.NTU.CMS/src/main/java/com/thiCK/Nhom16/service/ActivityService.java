@@ -24,11 +24,14 @@ public class ActivityService {
 
     // Lấy tất cả các hoạt động
     public List<Activity> getAllActivities() {
-        return activityRepo.findAll();  // Trả về danh sách tất cả hoạt động
+        return activityRepo.findAllByOrderByTimeDesc(); // dùng phiên bản sắp xếp
     }
+
 
     // Xóa hoạt động theo ID
     public void deleteById(Long id) {
         activityRepo.deleteById(id);
     }
+    
+    
 }

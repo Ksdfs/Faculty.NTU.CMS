@@ -4,6 +4,8 @@
       th:replace="~{layout :: main(~{::body})}">
 <head>
   <title>Dashboard | Faculty.NTU.CMS</title>
+
+  
 </head>
 <body>
   <div class="container-fluid p-4">
@@ -110,7 +112,10 @@
 	      th:each="act : ${recentActivities}">
 	    <div class="d-flex align-items-center">
 	      <!-- động: bi + act.icon + các class còn lại -->
-	      <i th:class="'bi bi-' + ${act.icon} + ' fs-4 text-primary me-3'"></i>
+	      <div class="icon-wrapper me-3 d-flex justify-content-center align-items-center">
+			  <i th:class="'bi bi-' + ${act.icon}"></i>
+			</div>
+
 	      <div>
 	        <div th:text="${act.action}">Activity text</div>
 	        <small class="text-muted"

@@ -25,4 +25,13 @@ public class CategoryPostController {
         categoryRepo.save(category);
         return "redirect:/post/all";
     }
+    
+    @GetMapping("/edit/{id}")
+    public String editCategory(@PathVariable("id") Long id, Model model) {
+        CategoryPost category = categoryRepo.findById(id)
+            .orElseThrow(() -> new IllegalArgumentException("Invalid category ID: " + id));
+        model.addAttribute("category", category);
+        return "category/category_form"; // Dùng lại giao diện tạo
+    }
+
 }

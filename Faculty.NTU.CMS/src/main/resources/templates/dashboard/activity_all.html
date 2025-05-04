@@ -38,6 +38,9 @@
           <option>All Types</option>
           <option>Edit</option>
           <option>Create</option>
+          <option>Delete</option>
+          <option>Publish</option>
+          <option>Login</option>
         </select>
       </div>
       <div class="col-md-3">
@@ -64,28 +67,53 @@
         <div class="d-flex">
           <!-- Icon -->
           <div class="me-3">
-            <div class="rounded-circle bg-light d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-              <i th:attr="data-feather=${activity.icon}" class="text-primary"></i>
-            </div>
+		<div class="d-flex justify-content-center align-items-center me-3"
+		     style="width: 40px; height: 40px; border-radius: 8px; background-color: #DBEAFE;">
+		  <i th:class="'bi bi-' + ${activity.icon}"
+		     style="font-size: 18px; color: #6C8FE8;"></i>
+		</div>
+
+
           </div>
 
           <!-- Content -->
-          <div>
-            <div>
-              <strong th:text="${activity.action}">Activity title</strong>
-            </div>
-            <div class="text-muted small mb-1" th:text="${activity.url}">URL</div>
-            <!-- Nếu bạn có user sau này thì mở comment dòng dưới -->
-            <!-- <div class="small text-muted" th:text="${activity.user}">User</div> -->
-          </div>
+<!-- Content -->
+		<div>
+		  <div>
+		    <strong th:text="${activity.action}">Activity title</strong>
+		  </div>
+		  <div class="text-muted small mb-1">
+		    <span th:if="${activity.action.contains('updated')}">Content and metadata changes were made to the page</span>
+		    <span th:if="${activity.action.contains('created')}">A new post was created in the category</span>
+		    <span th:if="${activity.action.contains('published')}">A new announcement was published to the website</span>
+		    <span th:if="${activity.action.contains('deleted')}">The content was removed from the system</span>
+		    <span th:if="${activity.action.contains('login')}">User logged into the system</span>
+		    <span th:unless="${activity.action.contains('updated') || activity.action.contains('created') || activity.action.contains('published') || activity.action.contains('deleted') || activity.action.contains('login')}">Action performed on the system</span>
+		  </div>
+		  <!-- Nếu bạn có user sau này thì mở comment dòng dưới -->
+		  <div class="small text-muted">Admin User</div>
+		</div>
         </div>
 
         <!-- Right side: label + time + action -->
         <div class="text-end">
           <div>
+            <!-- Thay đổi hiển thị badge từ icon sang loại hành động -->
             <span class="badge rounded-pill"
-                  th:classappend="${activity.action.contains('Edit')} ? 'bg-primary' : 'bg-success'"
-                  th:text="${activity.icon}">
+                  th:classappend="${
+                    activity.action.contains('Edit') ? 'bg-primary' : 
+                    activity.action.contains('Create') ? 'bg-success' : 
+                    activity.action.contains('Delete') ? 'bg-danger' : 
+                    activity.action.contains('Publish') ? 'bg-info' : 
+                    activity.action.contains('Login') ? 'bg-warning' : 'bg-secondary'
+                  }"
+                  th:text="${
+                    activity.action.contains('Edit') ? 'Edit' : 
+                    activity.action.contains('Create') ? 'Create' : 
+                    activity.action.contains('Delete') ? 'Delete' : 
+                    activity.action.contains('Publish') ? 'Publish' : 
+                    activity.action.contains('Login') ? 'Login' : 'Other'
+                  }">
               Action
             </span>
             <span class="text-muted small ms-2"
@@ -93,9 +121,9 @@
               Time
             </span>
           </div>
-          <div class="mt-2">
-            <a th:href="${activity.url}" class="btn btn-sm btn-outline-secondary">Show More</a>
-          </div>
+			<div class="mt-2">
+			  <a th:href="${activity.url}" class="btn btn-sm btn-outline-secondary">Show More</a>
+			</div>
         </div>
       </div>
     </div>

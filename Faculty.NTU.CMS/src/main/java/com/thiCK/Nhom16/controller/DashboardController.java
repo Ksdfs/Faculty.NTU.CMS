@@ -79,7 +79,8 @@ public class DashboardController {
         List<Activity> allActivities = activityService.getAllActivities();
 
         // Đưa vào model
-        model.addAttribute("allActivities", allActivities);
+        model.addAttribute("activities", allActivities); 
+
 
         // Trả về view hiển thị tất cả hoạt động
         return "dashboard/activity_all";  // Bạn cần tạo view activity_all.html

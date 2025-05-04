@@ -14,7 +14,7 @@ public class Post {
     private String title;
 
     @ManyToOne
-    @JoinColumn(name = "category_id") // Mapping với cột trong DB
+    @JoinColumn(name = "category_id")
     private CategoryPost category;
 
     private String author;
@@ -24,7 +24,18 @@ public class Post {
 
     private String status;
 
-    // Getter & Setter
+    @Column(columnDefinition = "NVARCHAR(MAX)")
+    private String excerpt;
+
+    @Column(columnDefinition = "NVARCHAR(MAX)")
+    private String content;
+
+    private String tags;
+
+    private String image;      // ảnh chính
+    private String thumbnail;  // ảnh phụ
+
+    // === Getter & Setter ===
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -42,4 +53,19 @@ public class Post {
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
+
+    public String getExcerpt() { return excerpt; }
+    public void setExcerpt(String excerpt) { this.excerpt = excerpt; }
+
+    public String getContent() { return content; }
+    public void setContent(String content) { this.content = content; }
+
+    public String getTags() { return tags; }
+    public void setTags(String tags) { this.tags = tags; }
+
+    public String getImage() { return image; }
+    public void setImage(String image) { this.image = image; }
+
+    public String getThumbnail() { return thumbnail; }
+    public void setThumbnail(String thumbnail) { this.thumbnail = thumbnail; }
 }

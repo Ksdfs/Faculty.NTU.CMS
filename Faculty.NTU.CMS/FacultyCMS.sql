@@ -7,7 +7,10 @@ CREATE TABLE page (
     title NVARCHAR(255),
     url NVARCHAR(255),
     last_updated NVARCHAR(50),
-    status NVARCHAR(50)
+    status NVARCHAR(50),
+	created_at DATETIME2 DEFAULT GETDATE(),
+	updated_at DATETIME2 DEFAULT GETDATE()
+
 );
 
 INSERT INTO page (title, url, last_updated, status) VALUES
@@ -22,7 +25,9 @@ INSERT INTO page (title, url, last_updated, status) VALUES
 
 CREATE TABLE category_post (
     id INT PRIMARY KEY IDENTITY(1,1),
-    name NVARCHAR(100) NOT NULL
+    name NVARCHAR(100) NOT NULL,
+	created_at DATETIME2 DEFAULT GETDATE(),
+	updated_at DATETIME2 DEFAULT GETDATE()
 );
 
 INSERT INTO category_post (name) VALUES
@@ -34,16 +39,23 @@ INSERT INTO category_post (name) VALUES
 CREATE TABLE post (
     id INT PRIMARY KEY IDENTITY(1,1),
     title NVARCHAR(255) NOT NULL,
-    category_id INT NOT NULL,          -- Foreign key đến category_post
+    category_id INT NOT NULL,           -- Foreign key đến category_post
     author NVARCHAR(100),
     post_date DATE,
-    status NVARCHAR(50),               -- Draft / Published / Pending Review
-    
+    status NVARCHAR(50),                -- Draft / Published / Pending Review
+	created_at DATETIME2 DEFAULT GETDATE(),
+	updated_at DATETIME2 DEFAULT GETDATE(),
+
+    excerpt NVARCHAR(MAX),              -- đoạn mô tả ngắn
+    content NVARCHAR(MAX),              -- nội dung bài viết
+    tags NVARCHAR(255),                 -- danh sách thẻ (tags)
+    image NVARCHAR(255),                -- ảnh chính
+    thumbnail NVARCHAR(255),            -- ảnh phụ
+
     CONSTRAINT FK_Post_Category FOREIGN KEY (category_id) REFERENCES category_post(id)
 );
 
 
-DROP TABLE post;
 
 
 INSERT INTO post (title, category_id, author, post_date, status) VALUES
@@ -60,7 +72,10 @@ CREATE TABLE notification (
     title NVARCHAR(255) NOT NULL,
     content NVARCHAR(MAX),
     post_date DATE,
-    status NVARCHAR(50)     
+    status NVARCHAR(50),
+	created_at DATETIME2 DEFAULT GETDATE(),
+	updated_at DATETIME2 DEFAULT GETDATE()
+
 );
 
 CREATE TABLE event (
@@ -69,17 +84,14 @@ CREATE TABLE event (
     description NVARCHAR(MAX),
     start_date DATE,
     end_date DATE,
-    status NVARCHAR(50)
-);
-
-ALTER TABLE event
-  ADD start_time TIME         NULL,
+    status NVARCHAR(50),
+	updated_at DATETIME2 DEFAULT GETDATE(),
+	created_at DATETIME2 DEFAULT GETDATE(),
+	start_time TIME         NULL,
       end_time   TIME         NULL,
       location   NVARCHAR(255) NULL,
-      organizer  NVARCHAR(255) NULL;
-
-
-
+      organizer  NVARCHAR(255) NULL,
+);
 CREATE TABLE activity (
     id BIGINT IDENTITY(1,1) PRIMARY KEY,
     action NVARCHAR(255)   NOT NULL,
@@ -87,4 +99,37 @@ CREATE TABLE activity (
     icon   NVARCHAR(100)   NULL,
     time   DATETIME2       NOT NULL
 );
+
+-- Bảng user tổng quát (dùng chung cho admin/editor)
+CREATE TABLE Users (
+    id BIGINT PRIMARY KEY IDENTITY(1,1),
+    username NVARCHAR(255) NOT NULL UNIQUE,
+    password NVARCHAR(255) NOT NULL,
+    email NVARCHAR(255) UNIQUE NULL,
+    role NVARCHAR(50) CHECK (role IN ('admin', 'editor')) NOT NULL,
+    created_at DATETIME2 DEFAULT GETDATE(),
+    updated_at DATETIME2 DEFAULT GETDATE()
+);
+
+-- Nếu bạn muốn tách riêng bảng admin và editor:
+CREATE TABLE Admin (
+    id BIGINT PRIMARY KEY,
+    full_name NVARCHAR(255),
+    department NVARCHAR(255),
+    created_at DATETIME2 DEFAULT GETDATE(),
+    updated_at DATETIME2 DEFAULT GETDATE(),
+    FOREIGN KEY (id) REFERENCES Users(id)
+);
+
+CREATE TABLE Editor (
+    id BIGINT PRIMARY KEY,
+    full_name NVARCHAR(255),
+    specialization NVARCHAR(255),
+    created_at DATETIME2 DEFAULT GETDATE(),
+    updated_at DATETIME2 DEFAULT GETDATE(),
+    FOREIGN KEY (id) REFERENCES Users(id)
+);
+
+
+
 

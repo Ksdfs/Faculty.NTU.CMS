@@ -10,4 +10,7 @@ public interface ActivityRepository extends JpaRepository<Activity, Long> {
 
     // Lấy tất cả các hoạt động
     List<Activity> findAll();  // Phương thức này sẽ tự động được cung cấp bởi JpaRepository
+    
+ // Phương thức mới có sắp xếp
+    List<Activity> findAllByOrderByTimeDesc();
 }

@@ -72,13 +72,17 @@ public class EventController {
                        || e.getTitle().toLowerCase().contains(keyword.toLowerCase()))
             .map(e -> {
                 Map<String, Object> m = new HashMap<>();
-                m.put("id",         e.getId());
-                m.put("title",      e.getTitle());
-                m.put("startDate",  e.getStartDate().toString());
-                m.put("startTime",  e.getStartTime().toString());
-                m.put("endTime",    e.getEndTime().toString());
-                m.put("location",   e.getLocation());
-                m.put("organizer",  e.getOrganizer());
+                m.put("id", e.getId());
+                m.put("title", e.getTitle());
+                // Sửa: đổi key và định dạng đúng cho FullCalendar
+                m.put("start", e.getStartDate().toString()); // key phải là "start"
+                m.put("end", e.getEndDate() != null ? e.getEndDate().toString() : null);
+                // Thêm các thông tin bổ sung trong extendedProps
+                m.put("startTime", e.getStartTime() != null ? e.getStartTime().toString() : null);
+                m.put("endTime", e.getEndTime() != null ? e.getEndTime().toString() : null);
+                m.put("location", e.getLocation());
+                m.put("organizer", e.getOrganizer());
+                m.put("status", e.getStatus());
                 return m;
             })
             .collect(Collectors.toList());
