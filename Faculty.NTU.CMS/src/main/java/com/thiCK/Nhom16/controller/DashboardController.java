@@ -7,11 +7,11 @@ import com.thiCK.Nhom16.repository.PostRepository;
 import com.thiCK.Nhom16.repository.NotificationRepository;
 import com.thiCK.Nhom16.repository.EventRepository;
 import com.thiCK.Nhom16.service.ActivityService;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Controller
+@RequestMapping("/dashboard")
 public class DashboardController {
 
     @Autowired private PageRepository pageRepo;
@@ -28,7 +29,7 @@ public class DashboardController {
     @Autowired private EventRepository eventRepo;
     @Autowired private ActivityService activityService;
 
-    @GetMapping({"/", "/dashboard"})
+    @GetMapping
     public String showDashboard(Model model) {
         // Tổng số Pages
         long totalPages = pageRepo.count();
@@ -46,21 +47,21 @@ public class DashboardController {
         // Sự kiện sắp tới
         List<Event> allEvents = eventRepo.findAll();
         long upcomingEventsCount = allEvents.stream()
-                .filter(e -> e.getStartDate().isAfter(today))
-                .count();
+            .filter(e -> e.getStartDate().isAfter(today))
+            .count();
         Optional<Event> nextEvent = allEvents.stream()
-                .filter(e -> !e.getStartDate().isBefore(today))
-                .min(Comparator.comparing(Event::getStartDate));
+            .filter(e -> !e.getStartDate().isBefore(today))
+            .min(Comparator.comparing(Event::getStartDate));
         long daysToNext = nextEvent
-                .map(e -> ChronoUnit.DAYS.between(today, e.getStartDate()))
-                .orElse(0L);
+            .map(e -> ChronoUnit.DAYS.between(today, e.getStartDate()))
+            .orElse(0L);
 
         // Lấy 5 hoạt động gần đây nhất
         List<Activity> recentActivities = activityService.getRecentActivities();
 
         // Đưa vào model
         model.addAttribute("totalPages", totalPages);
-        model.addAttribute("newPagesThisMonth", 0); // bổ sung khi có createdDate cho Page
+        model.addAttribute("newPagesThisMonth", 0); // cập nhật khi Page có createdDate
         model.addAttribute("totalPosts", totalPosts);
         model.addAttribute("newPostsThisMonth", newPostsThisMonth);
         model.addAttribute("totalAnnouncements", totalAnnouncements);
@@ -72,19 +73,11 @@ public class DashboardController {
         return "dashboard/dashboard";
     }
 
-    // Thêm phương thức để hiển thị tất cả các hoạt động
-    @GetMapping("/dashboard/activity_all")
+    // Hiển thị tất cả các hoạt động
+    @GetMapping("/activity_all")
     public String showAllActivities(Model model) {
-        // Lấy tất cả các hoạt động
         List<Activity> allActivities = activityService.getAllActivities();
-
-        // Đưa vào model
-        model.addAttribute("activities", allActivities); 
-
-
-        // Trả về view hiển thị tất cả hoạt động
-        return "dashboard/activity_all";  // Bạn cần tạo view activity_all.html
+        model.addAttribute("activities", allActivities);
+        return "dashboard/activity_all";
     }
-    
-    
 }

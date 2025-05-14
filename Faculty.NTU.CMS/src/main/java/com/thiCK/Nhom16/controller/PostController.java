@@ -1,7 +1,7 @@
 package com.thiCK.Nhom16.controller;
 
+import com.thiCK.Nhom16.entity.CategoryPost;
 import com.thiCK.Nhom16.entity.Post;
-import com.thiCK.Nhom16.enitity.CategoryPost;
 import com.thiCK.Nhom16.repository.CategoryPostRepository;
 import com.thiCK.Nhom16.repository.PostRepository;
 import com.thiCK.Nhom16.service.ActivityService;

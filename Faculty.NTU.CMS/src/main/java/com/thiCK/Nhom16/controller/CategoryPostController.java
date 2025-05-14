@@ -1,6 +1,6 @@
 package com.thiCK.Nhom16.controller;
 
-import com.thiCK.Nhom16.enitity.CategoryPost;
+import com.thiCK.Nhom16.entity.CategoryPost;
 import com.thiCK.Nhom16.repository.CategoryPostRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;

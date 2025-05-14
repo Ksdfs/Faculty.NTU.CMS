@@ -1,10 +1,14 @@
 package com.thiCK.Nhom16.entity;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
 import java.time.LocalDate;
-import com.thiCK.Nhom16.enitity.CategoryPost;
+import java.time.LocalDateTime;
 
 @Entity
+@Table(name = "post")
 public class Post {
 
     @Id
@@ -14,7 +18,7 @@ public class Post {
     private String title;
 
     @ManyToOne
-    @JoinColumn(name = "category_id")
+    @JoinColumn(name = "category_id", nullable = false)
     private CategoryPost category;
 
     private String author;
@@ -31,11 +35,27 @@ public class Post {
     private String content;
 
     private String tags;
-
     private String image;      // ảnh chính
     private String thumbnail;  // ảnh phụ
 
-    // === Getter & Setter ===
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
+    @ManyToOne
+    @JoinColumn(name = "created_by_admin_id")
+    private Admin createdByAdmin;
+
+    @ManyToOne
+    @JoinColumn(name = "created_by_qtv_id")
+    private QuanTriVien createdByQtv;
+
+    // === Getters & Setters ===
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -68,4 +88,16 @@ public class Post {
 
     public String getThumbnail() { return thumbnail; }
     public void setThumbnail(String thumbnail) { this.thumbnail = thumbnail; }
+
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+
+    public Admin getCreatedByAdmin() { return createdByAdmin; }
+    public void setCreatedByAdmin(Admin createdByAdmin) { this.createdByAdmin = createdByAdmin; }
+
+    public QuanTriVien getCreatedByQtv() { return createdByQtv; }
+    public void setCreatedByQtv(QuanTriVien createdByQtv) { this.createdByQtv = createdByQtv; }
 }

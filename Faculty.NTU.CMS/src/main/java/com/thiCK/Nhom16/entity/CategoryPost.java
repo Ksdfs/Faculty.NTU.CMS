@@ -5,22 +5,20 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
-@Table(name = "page")
-public class Page {
+@Table(name = "category_post")
+public class CategoryPost {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
-    private String title;
-    private String url;
+    private String name;
 
-    @Column(name = "last_updated")
-    private String lastUpdated;
-
-    private String status;
+    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
+    private List<Post> posts;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
@@ -40,50 +38,30 @@ public class Page {
 
     // === Getters & Setters ===
 
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
-
-    public void setId(Long id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
-    public String getTitle() {
-        return title;
+    public String getName() {
+        return name;
+    }
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
+    public List<Post> getPosts() {
+        return posts;
     }
-
-    public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
-    }
-
-    public String getLastUpdated() {
-        return lastUpdated;
-    }
-
-    public void setLastUpdated(String lastUpdated) {
-        this.lastUpdated = lastUpdated;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
+    public void setPosts(List<Post> posts) {
+        this.posts = posts;
     }
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
-
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
@@ -91,7 +69,6 @@ public class Page {
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
     }
-
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
     }
@@ -99,7 +76,6 @@ public class Page {
     public Admin getCreatedByAdmin() {
         return createdByAdmin;
     }
-
     public void setCreatedByAdmin(Admin createdByAdmin) {
         this.createdByAdmin = createdByAdmin;
     }
@@ -107,7 +83,6 @@ public class Page {
     public QuanTriVien getCreatedByQtv() {
         return createdByQtv;
     }
-
     public void setCreatedByQtv(QuanTriVien createdByQtv) {
         this.createdByQtv = createdByQtv;
     }
