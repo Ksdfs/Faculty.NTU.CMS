@@ -6,100 +6,112 @@ import com.thiCK.Nhom16.entity.User;
 import com.thiCK.Nhom16.repository.AdminRepository;
 import com.thiCK.Nhom16.repository.QuanTriVienRepository;
 import com.thiCK.Nhom16.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.*;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
-public class UserService implements UserDetailsService {
+public class UserService {
 
-    @Autowired private UserRepository userRepo;
-    @Autowired private AdminRepository adminRepo;
-    @Autowired private QuanTriVienRepository qtvRepo;
-    @Autowired private PasswordEncoder passwordEncoder;
+    private final UserRepository userRepo;
+    private final AdminRepository adminRepo;
+    private final QuanTriVienRepository qtvRepo;
 
-    // Đăng ký user mới với role USER
-    public User register(User user) {
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user.setRole("USER");
-        return userRepo.save(user);
+    public UserService(UserRepository userRepo,
+                       AdminRepository adminRepo,
+                       QuanTriVienRepository qtvRepo) {
+        this.userRepo = userRepo;
+        this.adminRepo = adminRepo;
+        this.qtvRepo = qtvRepo;
     }
 
-    // Lưu/ cập nhật User
+    /**
+     * Đăng ký user mới với role USER, lưu nguyên mật khẩu
+     * @return null nếu thành công, hoặc thông báo lỗi
+     */
+    public String registerUser(User user) {
+        if (userRepo.findByUsername(user.getUsername()).isPresent()) {
+            return "Tên đăng nhập đã tồn tại";
+        }
+        if (userRepo.findByEmail(user.getEmail()).isPresent()) {
+            return "Email đã tồn tại";
+        }
+        user.setRole("USER");
+        userRepo.save(user);
+        return null;
+    }
+
+    /**
+     * Lưu hoặc cập nhật User
+     */
     public User save(User user) {
         return userRepo.save(user);
     }
 
-    // Lấy tất cả user (dành cho admin)
-    public List<User> findAll() {
-        return userRepo.findAll();
-    }
+    /**
+     * Đăng nhập: kiểm tra tuần tự Admin, QuanTriVien, rồi User
+     * @return Admin, QuanTriVien hoặc User nếu thông tin đúng; ngược lại null
+     */
+    public Object login(String credential, String password) {
+        Optional<Admin> adminOpt = adminRepo.findByUsername(credential);
+        if (adminOpt.isPresent()) {
+            Admin a = adminOpt.get();
+            if (a.getPassword().equals(password)) {
+                return a;
+            }
+            return null;
+        }
 
-    // Xóa user theo ID (dành cho admin)
-    public void deleteById(Long id) {
-        userRepo.deleteById(id);
-    }
+        Optional<QuanTriVien> qtvOpt = qtvRepo.findByUsername(credential);
+        if (qtvOpt.isPresent()) {
+            QuanTriVien q = qtvOpt.get();
+            if (q.getPassword().equals(password)) {
+                return q;
+            }
+            return null;
+        }
 
-    // Kiểm tra mật khẩu cũ có đúng không
-    public boolean checkIfValidOldPassword(User user, String oldPassword) {
-        return passwordEncoder.matches(oldPassword, user.getPassword());
-    }
+        Optional<User> userOpt = userRepo.findByUsername(credential);
+        if (userOpt.isEmpty()) {
+            userOpt = userRepo.findByEmail(credential);
+        }
+        if (userOpt.isPresent()) {
+            User u = userOpt.get();
+            if (u.getPassword().equals(password)) {
+                return u;
+            }
+        }
 
-    // Thay đổi mật khẩu
-    public void changePassword(User user, String newPassword) {
-        user.setPassword(passwordEncoder.encode(newPassword));
-        userRepo.save(user);
+        return null;
     }
 
     /**
-     * Lấy UserDetails cho Spring Security.
-     * Thứ tự tìm: Admin -> QuanTriVien -> User
-     * Gán authority tương ứng ROLE_ADMIN, ROLE_QUANTRIVIEN, ROLE_USER
+     * Lấy danh sách tất cả Users (loại trừ Admin và QTV)
      */
-    @Override
-    public UserDetails loadUserByUsername(String credential)
-            throws UsernameNotFoundException {
-        // 1) Admin?
-        if (adminRepo.existsByUsername(credential)) {
-            Admin a = adminRepo.findByUsername(credential)
-                .orElseThrow(() -> new UsernameNotFoundException("Admin không tồn tại"));
-            return new org.springframework.security.core.userdetails.User(
-                a.getUsername(), a.getPassword(),
-                List.of(new SimpleGrantedAuthority("ROLE_ADMIN"))
-            );
-        }
-        // 2) QuanTriVien?
-        if (qtvRepo.existsByUsername(credential)) {
-            QuanTriVien q = qtvRepo.findByUsername(credential)
-                .orElseThrow(() -> new UsernameNotFoundException("Quản trị viên không tồn tại"));
-            return new org.springframework.security.core.userdetails.User(
-                q.getUsername(), q.getPassword(),
-                List.of(new SimpleGrantedAuthority("ROLE_QUANTRIVIEN"))
-            );
-        }
-        // 3) User bình thường
-        User u = userRepo.findByUsername(credential)
-            .or(() -> userRepo.findByEmail(credential))
-            .orElseThrow(() -> new UsernameNotFoundException("Không tìm thấy user: " + credential));
-        return new org.springframework.security.core.userdetails.User(
-            u.getUsername(), u.getPassword(),
-            List.of(new SimpleGrantedAuthority("ROLE_" + u.getRole()))
-        );
+    public List<User> findAllUsers() {
+        return userRepo.findAll();
     }
 
-    // Lấy User entity theo username (nếu cần)
-    public User findByUsername(String username) {
-        return userRepo.findByUsername(username)
-            .orElseThrow(() -> new UsernameNotFoundException("Không tìm thấy user: " + username));
+    /**
+     * Xóa user theo ID
+     */
+    public void deleteUser(Long id) {
+        userRepo.deleteById(id);
     }
 
-    // Lấy User entity theo email (nếu cần)
-    public User findByEmail(String email) {
-        return userRepo.findByEmail(email)
-            .orElseThrow(() -> new UsernameNotFoundException("Không tìm thấy user: " + email));
+    /**
+     * Kiểm tra mật khẩu cũ của User
+     */
+    public boolean checkOldPassword(User user, String oldPassword) {
+        return user.getPassword().equals(oldPassword);
+    }
+
+    /**
+     * Thay đổi mật khẩu cho User
+     */
+    public void changePassword(User user, String newPassword) {
+        user.setPassword(newPassword);
+        userRepo.save(user);
     }
 }

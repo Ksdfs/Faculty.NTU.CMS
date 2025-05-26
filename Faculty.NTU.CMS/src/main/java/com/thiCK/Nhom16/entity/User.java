@@ -1,36 +1,29 @@
 package com.thiCK.Nhom16.entity;
 
 import jakarta.persistence.*;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 import java.io.Serializable;
-import java.util.Collection;
-import java.util.Collections;
 
 @Entity
 @Table(name = "Users")
-public class User implements UserDetails, Serializable {
+public class User implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, length = 50)
     private String username;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, length = 100)
     private String email;
 
-    @Column(nullable = false)
-    private String password;
+    @Column(nullable = false, length = 60)
+    private String password;  // lưu hash của mật khẩu
 
-    @Column(nullable = false)
-    private String role;    // ví dụ "ROLE_USER"
+    @Column(nullable = false, length = 20)
+    private String role;      // ví dụ "USER", "ADMIN"
 
-    /** 
-     * Public no-arg constructor để JPA + các chỗ gọi new User() ngoài package đều thấy được 
-     */
     public User() {
     }
 
@@ -41,51 +34,63 @@ public class User implements UserDetails, Serializable {
         this.role     = role;
     }
 
-    // === Getter/Setter cho id ===
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    // === Getter & Setter ===
 
-    // === UserDetails: username ===
-    @Override
-    public String getUsername() { return username; }
-    public void setUsername(String username) { this.username = username; }
-
-    // === Getter/Setter cho email ===
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
-
-    // === UserDetails: password ===
-    @Override
-    public String getPassword() { return password; }
-    public void setPassword(String password) { this.password = password; }
-
-    // === Getter/Setter cho role ===
-    public String getRole() { return role; }
-    public void setRole(String role) { this.role = role; }
-
-    // === UserDetails override ===
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.singleton(() -> role);
+    public Long getId() {
+        return id;
     }
 
-    @Override
-    public boolean isAccountNonExpired() {
-        return true;
+    public void setId(Long id) {
+        this.id = id;
     }
 
-    @Override
-    public boolean isAccountNonLocked() {
-        return true;
+    public String getUsername() {
+        return username;
     }
 
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    /**
+     * Trả về mật khẩu đã hash
+     */
+    public String getPassword() {
+        return password;
+    }
+
+    /**
+     * Thiết lập mật khẩu (đã hash) trước khi lưu
+     */
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
+
+    // === toString(), equals(), hashCode() nếu cần ===
+
     @Override
-    public boolean isEnabled() {
-        return true;
+    public String toString() {
+        return "User{" +
+               "id=" + id +
+               ", username='" + username + '\'' +
+               ", email='" + email + '\'' +
+               ", role='" + role + '\'' +
+               '}';
     }
 }

@@ -2,10 +2,9 @@ package com.thiCK.Nhom16.controller;
 
 import com.thiCK.Nhom16.entity.User;
 import com.thiCK.Nhom16.service.UserService;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -24,10 +23,11 @@ public class UserController {
 
     // ==== Chỉnh sửa thông tin cá nhân ====
     @GetMapping("/edit")
-    public String showEditForm(
-            @AuthenticationPrincipal User currentUser,
-            Model model
-    ) {
+    public String showEditForm(HttpSession session, Model model) {
+        User currentUser = (User) session.getAttribute("user");
+        if (currentUser == null) {
+            return "redirect:/user/profile?login=true";
+        }
         model.addAttribute("user", currentUser);
         return "user/edit_profile";
     }
@@ -36,45 +36,51 @@ public class UserController {
     public String updateProfile(
             @ModelAttribute("user") @Valid User formUser,
             BindingResult result,
-            @AuthenticationPrincipal User currentUser,
+            HttpSession session,
             Model model
     ) {
         if (result.hasErrors()) {
             return "user/edit_profile";
         }
-        // Cập nhật các trường cho currentUser
+        User currentUser = (User) session.getAttribute("user");
         currentUser.setUsername(formUser.getUsername());
         currentUser.setEmail(formUser.getEmail());
-        // nếu entity User có thêm các trường khác, đặt ở đây...
         userService.save(currentUser);
-
+        session.setAttribute("user", currentUser);
         model.addAttribute("success", true);
         return "user/edit_profile";
     }
 
-
     // ==== Xem danh sách user (Admin) ====
-    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/list")
-    public String listUsers(Model model) {
-        List<User> all = userService.findAll();
-        model.addAttribute("users", all);
+    public String listUsers(HttpSession session, Model model) {
+        User currentUser = (User) session.getAttribute("user");
+        if (currentUser == null || !"ADMIN".equals(currentUser.getRole())) {
+            return "redirect:/user/profile";
+        }
+        List<User> users = userService.findAllUsers();
+        model.addAttribute("users", users);
         return "admin/user_list";
     }
 
-
     // ==== Xóa tài khoản (Admin) ====
-    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/delete/{id}")
-    public String deleteUser(@PathVariable Long id) {
-        userService.deleteById(id);
+    public String deleteUser(@PathVariable Long id, HttpSession session) {
+        User currentUser = (User) session.getAttribute("user");
+        if (currentUser == null || !"ADMIN".equals(currentUser.getRole())) {
+            return "redirect:/user/profile";
+        }
+        userService.deleteUser(id);
         return "redirect:/user/list";
     }
 
-
     // ==== Thay đổi mật khẩu ====
     @GetMapping("/change_password")
-    public String showChangePasswordForm(Model model) {
+    public String showChangePasswordForm(HttpSession session, Model model) {
+        User currentUser = (User) session.getAttribute("user");
+        if (currentUser == null) {
+            return "redirect:/user/profile?login=true";
+        }
         model.addAttribute("passwordForm", new PasswordForm());
         return "user/change_password";
     }
@@ -83,14 +89,13 @@ public class UserController {
     public String changePassword(
             @ModelAttribute("passwordForm") @Valid PasswordForm form,
             BindingResult result,
-            @AuthenticationPrincipal User currentUser,
+            HttpSession session,
             Model model
     ) {
-        // Kiểm tra password cũ
-        if (!userService.checkIfValidOldPassword(currentUser, form.getOldPassword())) {
+        User currentUser = (User) session.getAttribute("user");
+        if (!userService.checkOldPassword(currentUser, form.getOldPassword())) {
             result.rejectValue("oldPassword", null, "Mật khẩu cũ không đúng");
         }
-        // Kiểm tra xác nhận mật khẩu mới
         if (!form.getNewPassword().equals(form.getConfirmPassword())) {
             result.rejectValue("confirmPassword", null, "Mật khẩu mới không khớp");
         }
@@ -100,12 +105,12 @@ public class UserController {
         }
 
         userService.changePassword(currentUser, form.getNewPassword());
+        session.setAttribute("user", currentUser);
         model.addAttribute("success", true);
         return "user/change_password";
     }
 
-
-    // ===== DTO lớp nhỏ cho form đổi mật khẩu =====
+    // ===== DTO cho form đổi mật khẩu =====
     public static class PasswordForm {
         @NotBlank
         private String oldPassword;
