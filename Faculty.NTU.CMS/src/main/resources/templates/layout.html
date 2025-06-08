@@ -1,248 +1,425 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="vi"
-      th:fragment="main(content)">
+	th:fragment="main(content)">
 <head>
-    <meta charset="UTF-8">
-    <title>Faculty.NTU.CMS</title>
+<meta charset="UTF-8">
+<title>Faculty.NTU.CMS</title>
 
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
-      rel="stylesheet"/>
+<!-- Bootstrap CSS -->
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+	rel="stylesheet" />
+<!-- Bootstrap Icons -->
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
+	rel="stylesheet" />
+<!-- FullCalendar CSS -->
+<link
+	href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css"
+	rel="stylesheet" />
 
-    <!-- Icons & FullCalendar CSS -->
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
-      rel="stylesheet"/>
-    <link
-      href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css"
-      rel="stylesheet"/>
-      
-      
-    <style>
-        body { font-family: Arial, sans-serif; }
-        .table-responsive { overflow: visible !important; }
-        .sidebar {
-            height: calc(100vh - 60px);
-            background: #f8f9fa;
-            border-right: 1px solid #dee2e6;
-            position: fixed;
-            top: 60px;
-            left: 0;
-            width: 240px;
-            display: flex;
-            flex-direction: column;
-        }
-        .sidebar a {
-            padding: 12px 20px;
-            display: flex;
-            gap: 10px;
-            text-decoration: none;
-            color: #333;
-        }
-        .sidebar a:hover, .sidebar .active {
-            background: #e9ecef;
-            font-weight: bold;
-        }
-        .sidebar .top-menu {
-            flex-grow: 1;
-        }
-        .header {
-            height: 60px;
-            background: #fff;
-            border-bottom: 1px solid #dee2e6;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 1000;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 20px;
-        }
-        .content-wrapper {
-            margin-left: 240px;
-            margin-top: 60px;
-            padding: 20px;
-        }
-        .search-bar {
-            max-width: 300px;
-        }
-          .activity-view,.activity-delete {
-    display: inline-block;        
-    padding: 0.25rem 0.5rem;      
-    border-radius: 0.25rem;       
-    text-decoration: none !important;  /* bắt buộc bỏ gạch chân */
-    color: #000 !important;            /* bắt buộc chữ đen */
-    transition: background 0.2s;
-  }
-  .activity-view:hover {
-    background-color: #e9ecef;    /* nền xám nhạt khi hover */
-    text-decoration: none !important;
-    color: #000 !important;
-  }
-  
-    .activity-delete {
-    color: #dc3545; /* màu đỏ */
-  }
-
-  .activity-delete:hover {
-    background-color: #f8d7da; /* đỏ nhạt */
-    color: #dc3545;
-    
-  }
-  
-  .icon-wrapper {
-    width: 28px;
-    height: 28px;
-    border-radius: 50px;
-    background-color: #DBEAFE;
-  }
-  .icon-wrapper i {
-    font-size: 14px;
-    color: #6C8FE8;
-  }
-   
-   /* post_form */
-   .upload-box {
-  cursor: pointer;
-  transition: border-color 0.2s ease, color 0.2s ease;
+<!-- ========== CUSTOM CSS ========== -->
+<style>
+/* Reset font */
+body {
+	font-family: Arial, sans-serif;
 }
+
+/* Layout */
+.sidebar {
+	height: calc(100vh - 60px);
+	background: #f8f9fa;
+	border-right: 1px solid #dee2e6;
+	position: fixed;
+	top: 60px;
+	left: 0;
+	width: 240px;
+	display: flex;
+	flex-direction: column;
+}
+
+.sidebar a {
+	padding: 12px 20px;
+	display: flex;
+	gap: 10px;
+	text-decoration: none;
+	color: #333;
+}
+
+.sidebar a:hover, .sidebar a.active {
+	background: #e9ecef;
+	font-weight: bold;
+}
+
+.header {
+	height: 60px;
+	background: #fff;
+	border-bottom: 1px solid #dee2e6;
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	z-index: 1000;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 10px 20px;
+}
+
+.content-wrapper {
+	margin-left: 240px;
+	margin-top: 60px;
+	padding: 20px;
+}
+
+.search-bar {
+	max-width: 300px;
+}
+
+.table-responsive {
+	overflow: visible !important;
+}
+
+/* Activity buttons */
+.activity-view, .activity-delete {
+	display: inline-block;
+	padding: .25rem .5rem;
+	border-radius: .25rem;
+	text-decoration: none !important;
+	color: #000 !important;
+	transition: background .2s;
+}
+
+.activity-view:hover {
+	background: #e9ecef
+}
+
+.activity-delete {
+	color: #dc3545
+}
+
+.activity-delete:hover {
+	background: #f8d7da
+}
+
+/* Icon wrapper */
+.icon-wrapper {
+	width: 28px;
+	height: 28px;
+	border-radius: 50px;
+	background-color: #DBEAFE;
+}
+
+.icon-wrapper i {
+	font-size: 14px;
+	color: #6C8FE8;
+}
+
+/* Upload box */
+.upload-box {
+	cursor: pointer;
+	transition: border-color .2s, color .2s;
+}
+
 .upload-box:hover {
-  border-color: #2563eb;
-  color: #2563eb;
+	border-color: #2563eb;
+	color: #2563eb;
 }
 
-	/* Login */
-	/* Ẩn modal khi chưa có .show */
-	.modal.fade {
-	  display: none !important;
-	}
-	
-	/* Chỉ khi bật .show mới flex-center */
-	.modal.fade.show {
-	  display: flex !important;
-	  align-items: center;
-	  justify-content: center;
-	}
+/* Modal & Card */
+.modal.fade {
+	display: none !important;
+}
 
-	
-		/* Đặt modal-dialog không có margin, cho phép mở rộng */
-	.modal-dialog {
-	  margin: 0;
-	  max-width: none;
-	  /* width: 100%;  ← Bỏ hoặc đổi thành auto */
-	  width: auto;
-	}
-		
-	/* Tăng kích thước hộp login */
-	.login-card {
-	  width: 500px;             /* cố định 600px hoặc bạn có thể dùng 80vw */
-	  max-width: 90vw;          /* không vượt quá 90% viewport */
-	  margin: 0;                /* ensure centered */
-	  border-radius: 12px;
-	  background-color: #fff;
-	  box-shadow: 0 0 25px rgba(0,0,0,0.05);
-	}
-    .tab-btn {
-      width: 50%; border: none; padding: 10px 0;
-      font-weight: 500; background: #f1f3f5;
-    }
-    .tab-btn.active {
-      background: #fff; border-bottom: 2px solid #0d6efd;
-    }
-    .form-section { display: none; }
-    .form-section.active { display: block; }
-    .input-group-text { background: none; border-right: 0; }
-    .form-control { border-left: 0; }
+.modal.fade.show {
+	display: flex !important;
+	align-items: center;
+	justify-content: center;
+}
 
-    /* blur khi modal active */
-    .blur-background {
-      filter: blur(4px);
-    }
-    /* backdrop của modal cũng blur */
-    .modal-backdrop.show {
-      backdrop-filter: blur(4px);
-    }
-    </style>
+.modal-dialog {
+	margin: 0;
+	max-width: none;
+	width: auto;
+}
+
+.login-card {
+	width: 500px;
+	max-width: 90vw;
+	border-radius: 12px;
+	background-color: #fff;
+	box-shadow: 0 0 25px rgba(0, 0, 0, 0.05);
+}
+
+/* Tabs */
+.tab-btn {
+	flex: 1;
+	border: none;
+	padding: .5rem;
+	background: #f0f0f0;
+	cursor: pointer;
+}
+
+.tab-btn.active {
+	background: #fff;
+	font-weight: bold;
+	border-bottom: 2px solid #0d6efd;
+}
+
+/* Form sections */
+.form-section {
+	display: none;
+}
+
+.form-section.active {
+	display: block;
+}
+
+/* Input tweaks */
+.input-group-text {
+	background: none;
+	border-right: 0;
+}
+
+.form-control {
+	border-left: 0;
+}
+
+/* Blur overlay */
+.blur-background {
+	filter: blur(4px);
+	transition: filter .3s;
+}
+
+.modal-backdrop.show {
+	backdrop-filter: blur(4px);
+}
+</style>
 </head>
+
 
 <body>
 
-<!-- Header -->
-<div class="header" id="header">
-    <div class="d-flex align-items-center">
-        <span class="fw-bold fs-5 me-3">Faculty.NTU.CMS</span>
-        <input type="text" class="form-control search-bar" placeholder="Search content…">
-    </div>
-  <div class="d-flex align-items-center gap-3">
-    <i class="bi bi-bell"></i>
-    <div class="dropdown">
-      <a 
-        class="d-flex align-items-center text-dark dropdown-toggle" 
-        href="#" 
-        id="userDropdown" 
-        role="button"
-        data-bs-toggle="dropdown" 
-        aria-expanded="false">
-        <i class="bi bi-person-circle fs-5"></i>
-        <span class="ms-2">Admin User</span>
-      </a>
-      <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-        <li><a class="dropdown-item" th:href="@{/profile}">Profile</a></li>
-        <li><a class="dropdown-item" href="#" id="logoutButton">Đăng xuất</a></li>
-      </ul>
-    </div>
-  </div>
-</div>
+	<!-- Header -->
+	<div class="header" id="header">
+		<div class="d-flex align-items-center">
+			<span class="fw-bold fs-5 me-3">Faculty.NTU.CMS</span> <input
+				type="text" class="form-control search-bar"
+				placeholder="Search content…">
+		</div>
+		<div class="d-flex align-items-center gap-3">
+			<i class="bi bi-bell"></i>
+			<div class="dropdown">
+				<a class="d-flex align-items-center text-dark dropdown-toggle"
+					href="#" id="userDropdown" role="button" data-bs-toggle="dropdown"
+					aria-expanded="false"> <i class="bi bi-person-circle fs-5"></i>
+					<span class="ms-2"
+					th:text="${currentUser != null} ? ${currentUser.username} : 'Guest'">
+						Admin User </span>
+				</a>
+				<ul class="dropdown-menu dropdown-menu-end"
+					aria-labelledby="userDropdown">
+					<li><a class="dropdown-item" th:href="@{/index}">Profile</a></li>
+					<li><a class="dropdown-item" th:href="@{/user/logout}">Đăng
+							xuất</a></li>
 
-<!-- Sidebar -->
-<nav class="sidebar py-3" id="sidebar">
-    <div class="top-menu">
-        <a href="/dashboard"><i class="bi bi-house"></i>Dashboard</a>
-        <a href="/page/all" class="active"><i class="bi bi-file-earmark-text"></i>Pages</a>
-        <a href="/post/all"><i class="bi bi-book"></i>Posts</a>
-        <a href="/moderation/posts"><i class="bi bi-shield-check"></i>Post Moderation</a>
-        <a href="/notification/all"><i class="bi bi-chat-left-text"></i>Announcements</a>
-        <a href="/event/all"><i class="bi bi-calendar-event"></i>Events</a>
-        <a href="/menu/all"><i class="bi bi-list"></i>Menus</a>
-        <hr class="mx-3">
-        <span class="px-3 text-muted small">Analytics</span>
-        <a href="/analytics"><i class="bi bi-bar-chart-line"></i>Analytics</a>
-    </div>
-    <div class="d-flex justify-content-between px-3 py-2 border-top">
-        <a href="/settings"><i class="bi bi-gear"></i>Settings</a>
-        <a href="#"><i class="bi bi-brightness-high"></i></a>
-    </div>
-</nav>
+				</ul>
+			</div>
+		</div>
+	</div>
 
-<!-- Chỗ cắm nội dung các trang con -->
-<div class="content-wrapper" id="content">
-    <div th:insert="${content}"></div>
-</div>
+	<!-- ========== SIDEBAR ========== -->
+	<!-- src/main/resources/templates/layout_admin.html -->
+	<nav class="sidebar py-3" id="sidebar">
+		<div class="top-menu">
 
-<!-- include modal login -->
-  <div th:replace="~{fragments/login_modal :: loginModal}"></div>
+			<!-- Dashboard -->
+			<a th:href="@{/dashboard}"
+				class="d-flex align-items-center gap-2 mb-2"
+				th:classappend="${currentUri == '/dashboard'} ? ' active' : ''">
+				<i class="bi bi-house"></i> <span>Dashboard</span>
+			</a>
 
-<!-- form ẩn để logout -->
- 	<form id="logoutForm" th:action="@{/logout}" method="post" style="display:none;"></form>
+			<!-- Pages: toggle + collapse -->
+			<div class="mb-2">
+				<!-- nút toggle, không phải link -->
+				<button class="btn btn-toggle d-flex align-items-center gap-2 w-100"
+					data-bs-toggle="collapse" data-bs-target="#pagesCollapse"
+					aria-expanded="${#strings.startsWith(currentUri,'/page')}"
+					aria-controls="pagesCollapse"
+					th:classappend="${#strings.startsWith(currentUri,'/page')} ? ' active' : ''">
+					<i class="bi bi-file-earmark-text"></i> <span>Pages</span> <i
+						class="bi bi-caret-down-fill ms-auto"></i>
+				</button>
+				<!-- menu con -->
+				<div id="pagesCollapse" class="collapse ps-3"
+					th:classappend="${#strings.startsWith(currentUri,'/page')} ? ' show' : ''">
+					<!-- All Pages -->
+					<a th:href="@{/page/all}" class="d-block py-2 ps-4 link-secondary"
+						th:classappend="${currentUri=='/page/all'} ? ' active' : ''">
+						All Pages </a>
+					<!-- Add Page -->
+					<a th:href="@{/page/new}" class="d-block py-2 ps-4 link-secondary"
+						th:classappend="${currentUri=='/page/new'} ? ' active' : ''">
+						Add Page </a>
+									<a th:href="@{/menu/all}" class="d-block py-2 ps-4 link-secondary"
+					th:classappend="${currentUri.startsWith('/menu')} ? ' active' : ''">
+					Page Menu </a>
+				</div>
+			</div>
 
-<!-- Script chung -->
-  <script
-    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js">
-  </script>
-  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-      const logoutBtn = document.getElementById('logoutButton');
-      if (!logoutBtn) return;
+			<!-- Posts -->
+			<a th:href="@{/post/all}"
+				class="d-flex align-items-center gap-2 mb-2"
+				th:classappend="${currentUri.startsWith('/post')} ? ' active' : ''">
+				<i class="bi bi-book"></i> <span>Posts</span>
+			</a>
 
-      logoutBtn.addEventListener('click', function (e) {
-        e.preventDefault();
-        document.getElementById('logoutForm').submit();
+			<!-- Post Moderation (Admin) -->
+			<a th:if="${isAdmin}" th:href="@{/moderation/posts}"
+				class="d-flex align-items-center gap-2 mb-2"
+				th:classappend="${currentUri.startsWith('/moderation/posts')} ? ' active' : ''">
+				<i class="bi bi-shield-check"></i> <span>Post Moderation</span>
+			</a>
+
+			<!-- Announcements -->
+			<a th:href="@{/notification/all}"
+				class="d-flex align-items-center gap-2 mb-2"
+				th:classappend="${currentUri.startsWith('/notification')} ? ' active' : ''">
+				<i class="bi bi-chat-left-text"></i> <span>Announcements</span>
+			</a>
+
+			<!-- Events -->
+			<a th:href="@{/event/all}"
+				class="d-flex align-items-center gap-2 mb-2"
+				th:classappend="${currentUri.startsWith('/event')} ? ' active' : ''">
+				<i class="bi bi-calendar-event"></i> <span>Events</span>
+			</a>
+
+			<!-- Menus -->
+			<a th:href="@{/menu/all}"
+				class="d-flex align-items-center gap-2 mb-2"
+				th:classappend="${currentUri.startsWith('/menu')} ? ' active' : ''">
+				<i class="bi bi-list"></i> <span>Menus</span>
+			</a>
+
+			<!-- Site Settings -->
+			<div class="mb-2">
+				<button class="btn btn-toggle d-flex align-items-center gap-2 w-100"
+					data-bs-toggle="collapse" data-bs-target="#siteSettings"
+					aria-expanded="false" aria-controls="siteSettings">
+					<i class="bi bi-gear-fill"></i> <span>Cài đặt Site</span> <i
+						class="bi bi-caret-down-fill ms-auto"></i>
+				</button>
+				<div id="siteSettings" class="collapse ps-3">
+					<a th:href="@{/settings/site-name}"
+						class="d-block py-2 ps-4 link-secondary"
+						th:classappend="${currentUri=='/settings/site-name'} ? ' active' : ''">
+						Đổi tên Site </a> <a th:href="@{/settings/logo}"
+						class="d-block py-2 ps-4 link-secondary"
+						th:classappend="${currentUri=='/settings/logo'} ? ' active' : ''">
+						Đổi Logo </a> <a th:href="@{/settings/contact}"
+						class="d-block py-2 ps-4 link-secondary"
+						th:classappend="${currentUri=='/settings/contact'} ? ' active' : ''">
+						Thông tin liên hệ </a> <a th:href="@{/settings/social}"
+						class="d-block py-2 ps-4 link-secondary"
+						th:classappend="${currentUri=='/settings/social'} ? ' active' : ''">
+						Mạng xã hội </a>
+				</div>
+			</div>
+
+		</div>
+
+		<!-- Bottom quick links -->
+		<div class="d-flex justify-content-between px-3 py-2 border-top">
+			<a th:href="@{/settings}"><i class="bi bi-gear"></i>Settings</a> <a
+				href="#"><i class="bi bi-brightness-high"></i></a>
+		</div>
+	</nav>
+
+	<!-- ========== /SIDEBAR ========== -->
+
+
+	<!-- Nội dung trang con -->
+	<div class="content-wrapper" id="content">
+		<div th:insert="${content}"></div>
+	</div>
+
+
+	<!-- Scripts chung -->
+	<script
+		src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+	<script
+		src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
+	<script>
+  setTimeout(() => {
+    const modal = document.getElementById('loginModal');
+    if (!modal) return;
+
+    modal.addEventListener('shown.bs.modal', function () {
+      const tabButtons = modal.querySelectorAll(".tab-btn");
+      const forms = modal.querySelectorAll(".form-section");
+
+      function showForm(formId) {
+        forms.forEach(form => form.classList.remove("active"));
+        const form = modal.querySelector(`#${formId}`);
+        if (form) form.classList.add("active");
+
+        tabButtons.forEach(btn => btn.classList.remove("active"));
+        const btn = modal.querySelector(`[data-tab="${formId}"]`);
+        if (btn) btn.classList.add("active");
+      }
+
+      // Gắn sự kiện tab 1 lần
+      tabButtons.forEach(btn => {
+        btn.addEventListener("click", () => {
+          const formId = btn.getAttribute("data-tab");
+          showForm(formId);
+        });
       });
+
+      showForm("login-form");
     });
-  </script>
+  }, 500); // delay 500ms đảm bảo modal đã có trong DOM
+</script>
+
+
+	<!-- Modal đăng nhập: chỉ hiển thị nếu chưa đăng nhập admin/qtv -->
+	<div th:if="${session.admin == null and session.quantrivien == null}"
+		th:replace="~{fragments/login_modal :: loginModal}"></div>
+	<!-- TinyMCE v7 -->
+	<script
+		src="https://cdn.tiny.cloud/1/tkwtcufjpjmhis2jwvnx9mrk6i8y011gzr24ygvrxy1pwt5w/tinymce/7/tinymce.min.js"
+		referrerpolicy="origin" defer></script>
+
+	<script>
+/* Khởi tạo TinyMCE chỉ khi trang có #contentEditor */
+document.addEventListener("DOMContentLoaded", () => {
+  const editorEl = document.getElementById("contentEditor");
+  if (!editorEl) return;          // Trang hiện tại không có editor
+
+  tinymce.init({
+    selector: '#contentEditor',   // Field duy nhất cần WYSIWYG
+    height: 500,
+    plugins: 'anchor autolink charmap codesample emoticons image link lists media ' +
+             'searchreplace table visualblocks wordcount',
+    toolbar: 'undo redo | blocks fontfamily fontsize | ' +
+             'bold italic underline strikethrough | ' +
+             'link image media table | align lineheight | ' +
+             'numlist bullist indent outdent | emoticons charmap | removeformat',
+    branding: false,
+    menubar: false,
+    /* Tuỳ chọn upload ảnh trực tiếp (bật khi bạn đã có endpoint ở /tinymce/upload) */
+    // images_upload_url: '/tinymce/upload',
+    // images_upload_credentials: true,
+    setup: (editor) => {
+      // Đảm bảo nội dung đẩy về <textarea> thật khi thay đổi
+      editor.on('change', () => editor.save());
+    }
+  });
+});
+</script>
+
 
 </body>
 </html>

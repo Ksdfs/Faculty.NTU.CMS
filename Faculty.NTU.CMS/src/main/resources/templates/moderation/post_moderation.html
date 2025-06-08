@@ -180,11 +180,11 @@
                                             </button>
                                         </form>
 
-                                        <!-- Reject Button (for Pending Review) -->
+                                        <!-- Reject Button (for Pending Review) - SỬA LỖI Ở ĐÂY -->
                                         <button th:if="${post.status == 'Pending Review'}" 
                                                 type="button" class="btn btn-sm btn-danger"
                                                 data-bs-toggle="modal" 
-                                                th:data-bs-target="'#rejectModal' + ${post.id}">
+                                                th:attr="data-bs-target='#rejectModal' + ${post.id}">
                                             <i class="bi bi-x-lg"></i>
                                         </button>
 
@@ -223,14 +223,14 @@
             </div>
         </div>
 
-        <!-- Reject Modals -->
+        <!-- Reject Modals - SỬA LỖI Ở ĐÂY -->
         <div th:each="post : ${posts}" th:if="${post.status == 'Pending Review'}"
-             class="modal fade" th:id="'rejectModal' + ${post.id}" tabindex="-1">
+             class="modal fade" th:id="'rejectModal' + ${post.id}" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title">Reject Post</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <form th:action="@{'/moderation/posts/' + ${post.id} + '/reject'}" method="post">
                         <div class="modal-body">
@@ -260,3 +260,29 @@
 .btn-group .btn { border-radius: 0.25rem !important; margin-right: 2px; }
 .btn-group .btn:last-child { margin-right: 0; }
 </style>
+
+<!-- Thêm script để đảm bảo Bootstrap Modal hoạt động đúng -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Đảm bảo Bootstrap đã được load
+    if (typeof bootstrap !== 'undefined') {
+        // Khởi tạo tất cả các modal
+        var modals = document.querySelectorAll('.modal');
+        modals.forEach(function(modal) {
+            new bootstrap.Modal(modal);
+        });
+        
+        // Đảm bảo các nút reject mở đúng modal
+        var rejectButtons = document.querySelectorAll('[data-bs-toggle="modal"]');
+        rejectButtons.forEach(function(button) {
+            button.addEventListener('click', function() {
+                var targetModal = document.querySelector(button.getAttribute('data-bs-target'));
+                if (targetModal) {
+                    var modalInstance = bootstrap.Modal.getInstance(targetModal) || new bootstrap.Modal(targetModal);
+                    modalInstance.show();
+                }
+            });
+        });
+    }
+});
+</script>

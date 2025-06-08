@@ -1,52 +1,68 @@
 <div xmlns:th="http://www.thymeleaf.org"
-     th:replace="~{layout :: main(~{::pageContent})}">
+	th:replace="~{layout :: main(~{::pageContent})}">
 
-    <div th:fragment="pageContent" class="container py-4">
+	<div th:fragment="pageContent" class="container py-4">
 
-        <!-- Tiêu đề động -->
-        <h2 class="mb-4" th:text="${page.id != null} ? 'Edit Page' : 'Create New Page'">Create/Edit Page</h2>
+		<!-- Tiêu đề động -->
+		<h2 class="mb-4"
+			th:text="${page.id != null} ? 'Edit Page' : 'Create New Page'">
+			Create/Edit Page</h2>
 
-        <form th:action="@{/page/save}" th:object="${page}" method="post" class="row g-3">
+		<form th:action="@{/page/save}" th:object="${page}" method="post"
+			class="row g-3">
 
-            <!-- Trường ẩn để giữ ID khi sửa -->
-            <input type="hidden" th:if="${page.id != null}" th:field="*{id}" />
+			<!-- Ẩn ID khi sửa -->
+			<input type="hidden" th:if="${page.id != null}" th:field="*{id}" />
 
-            <div class="col-md-6">
-                <label for="title" class="form-label">Title</label>
-                <input type="text" th:field="*{title}" class="form-control" id="title" required>
-            </div>
-
-            <div class="col-md-6">
-                <label for="url" class="form-label">URL</label>
-                <input type="text" th:field="*{url}" class="form-control" id="url" required>
-            </div>
-
+			<!-- Title -->
 			<div class="col-md-6">
-			    <label for="lastUpdated" class="form-label">Last Updated</label>
-			    <div class="input-group">
-			        <input type="date" th:field="*{lastUpdated}" class="form-control" id="lastUpdated">
-			        <span class="input-group-text">
-			            <i class="bi bi-calendar-date"></i>
-			        </span>
-			    </div>
+				<label for="title" class="form-label">Title</label> <input
+					type="text" th:field="*{title}" id="title" class="form-control"
+					required>
 			</div>
 
+			<input type="hidden" th:field="*{url}" />
+			<!-- Ngày phát hành -->
+			<div class="col-md-6">
+				<label for="publishDate" class="form-label">Publish Date</label> <input
+					type="datetime-local" th:field="*{publishDate}" id="publishDate"
+					class="form-control">
+			</div>
 
-            <div class="col-md-6">
-                <label for="status" class="form-label">Status</label>
-                <select th:field="*{status}" class="form-select" id="status">
-                    <option value="Draft">Draft</option>
-                    <option value="Published">Published</option>
-                </select>
-            </div>
+			<!-- Chọn menu cha -->
+			<div class="col-md-6">
+				<label for="parentMenuId" class="form-label">Parent Menu</label> <select
+					name="parentMenuId" id="parentMenuId" class="form-select">
+					<option value="">-- Không gắn menu --</option>
+					<option th:each="m : ${allMenus}" th:value="${m.id}"
+						th:selected="${page.menu != null and m.id == page.menu.parent?.id}"
+						th:text="${m.title}"></option>
+				</select>
+			</div>
 
-            <div class="col-12">
-                <!-- Nút động: Save / Update -->
-                <button type="submit" class="btn btn-primary"
-                        th:text="${page.id != null} ? 'Update Page' : 'Save Page'">Save Page</button>
-                <a th:href="@{/page/all}" class="btn btn-secondary">Cancel</a>
-            </div>
-        </form>
+			<!-- Status -->
+			<div class="col-md-6">
+				<label for="status" class="form-label">Status</label> <select
+					th:field="*{status}" id="status" class="form-select">
+					<option value="Draft">Draft</option>
+					<option value="Published">Published</option>
+				</select>
+			</div>
 
-    </div>
+			<!-- Nội dung -->
+			<div class="col-12">
+				<label for="contentEditor" class="form-label">Content</label>
+				<textarea id="contentEditor" th:field="*{content}"
+					class="form-control" rows="10"></textarea>
+			</div>
+
+			<!-- Nút hành động -->
+			<div class="col-12">
+				<button type="submit" class="btn btn-primary"
+					th:text="${page.id != null} ? 'Update Page' : 'Save Page'">
+					Save Page</button>
+				<a th:href="@{/page/all}" class="btn btn-secondary">Cancel</a>
+			</div>
+		</form>
+	</div>
 </div>

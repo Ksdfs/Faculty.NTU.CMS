@@ -16,6 +16,7 @@ public class NotificationController {
 
     private final NotificationRepository notificationRepo;
     private final ActivityService activityService;
+    @Autowired private NotificationRepository repo;
 
     @Autowired
     public NotificationController(NotificationRepository notificationRepo,
@@ -96,4 +97,19 @@ public class NotificationController {
 
         return "redirect:/notification/all";
     }
+    
+    public List<Notification> findTop3ByStatusOrderByPostDateDesc(String status) {
+        return repo.findTop3ByStatusOrderByPostDateDesc(status);
+    }
+    @GetMapping("/announcements")
+    public String showAnnouncements(Model model) {
+        List<Notification> announcements = notificationRepo.findByStatusOrderByPostDateDesc("Published");
+        model.addAttribute("notifications", announcements);
+        model.addAttribute("page", "announcements"); // để active menu
+        model.addAttribute("pageTitle", "Thông báo");
+        return "user/notification/announcements";
+    }
+
+   
+
 }

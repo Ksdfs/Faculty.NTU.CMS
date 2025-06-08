@@ -25,6 +25,16 @@ public class AuthController {
         this.userRepository = userRepository;
     }
 
+    @ModelAttribute("loginUser")
+    public User loginUser() {
+        return new User();
+    }
+
+    @ModelAttribute("registerUser")
+    public User registerUser() {
+        return new User();
+    }
+
     /**
      * Hiển thị profile, bao gồm login/register modal
      */
@@ -55,14 +65,14 @@ public class AuthController {
      * Xử lý đăng ký
      */
     @PostMapping("/register")
-    public String register(@ModelAttribute("user") @Valid User user,
+    public String register(@ModelAttribute("registerUser") @Valid User registerUser,
                            BindingResult result,
                            Model model) {
         if (result.hasErrors()) {
             model.addAttribute("modalRegister", true);
             return "user/profile";
         }
-        String error = userService.registerUser(user);
+        String error = userService.registerUser(registerUser);
         if (error != null) {
             result.rejectValue("email", null, error);
             model.addAttribute("modalRegister", true);
@@ -75,28 +85,23 @@ public class AuthController {
      * Xử lý đăng nhập
      */
     @PostMapping("/login")
-    public String login(@RequestParam String credential,
-                        @RequestParam String password,
+    public String login(@ModelAttribute("loginUser") User loginUser,
+                        BindingResult loginResult,
                         HttpSession session,
                         Model model) {
-        Object u = userService.login(credential, password);
+        Object u = userService.login(loginUser.getUsername(), loginUser.getPassword());
         if (u == null) {
             model.addAttribute("loginError", "Sai tên đăng nhập hoặc mật khẩu");
             model.addAttribute("login", true);
             return "user/profile";
         }
-        // Lưu vào session
         session.setAttribute("user", u);
 
-        // Nếu là Admin
-        if (u instanceof Admin) {
-            return "redirect:/admin";
+        // Chuyển cả Admin và QuanTriVien về dashboard
+        if (u instanceof Admin || u instanceof QuanTriVien) {
+            return "redirect:/dashboard";
         }
-        // Nếu là Quản trị viên
-        if (u instanceof QuanTriVien) {
-            return "redirect:/qtv/dashboard";
-        }
-        // Mặc định là User thường
+        // Các user khác vẫn trả về profile
         return "redirect:/user/profile";
     }
 
@@ -106,6 +111,6 @@ public class AuthController {
     @GetMapping("/logout")
     public String logout(HttpSession session) {
         session.invalidate();
-        return "redirect:/user/profile?logout=true";
+        return "redirect:/";
     }
 }

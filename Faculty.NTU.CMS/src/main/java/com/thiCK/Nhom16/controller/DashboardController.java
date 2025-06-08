@@ -1,12 +1,14 @@
 package com.thiCK.Nhom16.controller;
 
-import com.thiCK.Nhom16.entity.Event;
 import com.thiCK.Nhom16.entity.Activity;
+import com.thiCK.Nhom16.entity.Admin;
+import com.thiCK.Nhom16.entity.Event;
+import com.thiCK.Nhom16.repository.EventRepository;
+import com.thiCK.Nhom16.repository.NotificationRepository;
 import com.thiCK.Nhom16.repository.PageRepository;
 import com.thiCK.Nhom16.repository.PostRepository;
-import com.thiCK.Nhom16.repository.NotificationRepository;
-import com.thiCK.Nhom16.repository.EventRepository;
 import com.thiCK.Nhom16.service.ActivityService;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -30,38 +32,40 @@ public class DashboardController {
     @Autowired private ActivityService activityService;
 
     @GetMapping
-    public String showDashboard(Model model) {
-        // Tổng số Pages
-        long totalPages = pageRepo.count();
-        // Tổng số Posts
-        long totalPosts = postRepo.count();
-        // Số Posts tạo trong tháng này
+    public String showDashboard(Model model, HttpSession session) {
         LocalDate today = LocalDate.now();
         LocalDate firstOfMonth = today.withDayOfMonth(1);
-        long newPostsThisMonth = postRepo.countByPostDateBetween(firstOfMonth, today);
 
-        // Tổng thông báo & số thông báo đang ở trạng thái "Published"
+        long totalPages = pageRepo.count();
+        long totalPosts = postRepo.count();
+        long newPostsThisMonth = postRepo.countByPostDateBetween(firstOfMonth, today);
         long totalAnnouncements = notiRepo.count();
         long activeAnnouncements = notiRepo.findByStatus("Published").size();
 
-        // Sự kiện sắp tới
         List<Event> allEvents = eventRepo.findAll();
         long upcomingEventsCount = allEvents.stream()
             .filter(e -> e.getStartDate().isAfter(today))
             .count();
+
         Optional<Event> nextEvent = allEvents.stream()
             .filter(e -> !e.getStartDate().isBefore(today))
             .min(Comparator.comparing(Event::getStartDate));
+
         long daysToNext = nextEvent
             .map(e -> ChronoUnit.DAYS.between(today, e.getStartDate()))
             .orElse(0L);
 
-        // Lấy 5 hoạt động gần đây nhất
+        // Thống kê bài đăng chờ duyệt nếu là Admin
+        Object currentUser = session.getAttribute("user");
+        if (currentUser instanceof Admin) {
+            long pendingPostsCount = postRepo.countByStatus("Pending Review");
+            model.addAttribute("pendingPostsCount", pendingPostsCount);
+        }
+
         List<Activity> recentActivities = activityService.getRecentActivities();
 
-        // Đưa vào model
         model.addAttribute("totalPages", totalPages);
-        model.addAttribute("newPagesThisMonth", 0); // cập nhật khi Page có createdDate
+        model.addAttribute("newPagesThisMonth", 0); // placeholder
         model.addAttribute("totalPosts", totalPosts);
         model.addAttribute("newPostsThisMonth", newPostsThisMonth);
         model.addAttribute("totalAnnouncements", totalAnnouncements);
@@ -73,7 +77,6 @@ public class DashboardController {
         return "dashboard/dashboard";
     }
 
-    // Hiển thị tất cả các hoạt động
     @GetMapping("/activity_all")
     public String showAllActivities(Model model) {
         List<Activity> allActivities = activityService.getAllActivities();

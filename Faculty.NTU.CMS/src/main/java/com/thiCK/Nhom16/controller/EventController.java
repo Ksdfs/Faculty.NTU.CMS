@@ -5,7 +5,6 @@ import com.thiCK.Nhom16.repository.EventRepository;
 import com.thiCK.Nhom16.service.ActivityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -30,54 +29,51 @@ public class EventController {
         this.activityService = activityService;
     }
 
-    // 🗓️ Hiển thị trang calendar/list, có filter
+    // 🗓️ Hiển thị trang danh sách sự kiện với layout người dùng
     @GetMapping("/all")
     public String listEvents(
-        @RequestParam(name="keyword",  required=false) String keyword,
-        @RequestParam(name="status",   required=false) String status,
-        @RequestParam(name="fromDate", required=false)
-          @DateTimeFormat(iso = ISO.DATE) LocalDate fromDate,
-        @RequestParam(name="toDate",   required=false)
-          @DateTimeFormat(iso = ISO.DATE) LocalDate toDate,
+        @RequestParam(name = "keyword", required = false) String keyword,
+        @RequestParam(name = "status", required = false) String status,
+        @RequestParam(name = "fromDate", required = false)
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
+        @RequestParam(name = "toDate", required = false)
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate,
         Model model) {
 
         List<Event> filtered = eventRepo.findAll().stream()
             .filter(e -> keyword == null || keyword.isBlank()
-                     || e.getTitle().toLowerCase().contains(keyword.toLowerCase()))
+                    || e.getTitle().toLowerCase().contains(keyword.toLowerCase()))
             .filter(e -> status == null || status.isBlank()
-                     || e.getStatus().equalsIgnoreCase(status))
+                    || e.getStatus().equalsIgnoreCase(status))
             .filter(e -> fromDate == null
-                     || !e.getStartDate().isBefore(fromDate))
+                    || !e.getStartDate().isBefore(fromDate))
             .filter(e -> toDate == null
-                     || !e.getStartDate().isAfter(toDate))
+                    || !e.getStartDate().isAfter(toDate))
             .collect(Collectors.toList());
 
-        model.addAttribute("events",   filtered);
-        model.addAttribute("keyword",  keyword);
-        model.addAttribute("status",   status);
-        model.addAttribute("fromDate", fromDate);
-        model.addAttribute("toDate",   toDate);
+        model.addAttribute("events", filtered);
+        model.addAttribute("page", "events"); // để active menu
+        model.addAttribute("pageTitle", "Sự kiện");
+
+        // ✅ Trả về đúng template mới
         return "event/event_list";
     }
 
     // 📊 API trả JSON cho FullCalendar
     @GetMapping("/api")
     @ResponseBody
-    public List<Map<String,Object>> getEventData(
-            @RequestParam(name="keyword", required=false) String keyword) {
+    public List<Map<String, Object>> getEventData(
+        @RequestParam(name = "keyword", required = false) String keyword) {
 
         return eventRepo.findAll().stream()
-            .filter(e -> keyword == null
-                       || keyword.isBlank()
-                       || e.getTitle().toLowerCase().contains(keyword.toLowerCase()))
+            .filter(e -> keyword == null || keyword.isBlank()
+                    || e.getTitle().toLowerCase().contains(keyword.toLowerCase()))
             .map(e -> {
                 Map<String, Object> m = new HashMap<>();
                 m.put("id", e.getId());
                 m.put("title", e.getTitle());
-                // Sửa: đổi key và định dạng đúng cho FullCalendar
-                m.put("start", e.getStartDate().toString()); // key phải là "start"
+                m.put("start", e.getStartDate().toString());
                 m.put("end", e.getEndDate() != null ? e.getEndDate().toString() : null);
-                // Thêm các thông tin bổ sung trong extendedProps
                 m.put("startTime", e.getStartTime() != null ? e.getStartTime().toString() : null);
                 m.put("endTime", e.getEndTime() != null ? e.getEndTime().toString() : null);
                 m.put("location", e.getLocation());
@@ -95,30 +91,24 @@ public class EventController {
         return "event/event_form";
     }
 
-    // 💾 Lưu sự kiện (tạo mới hoặc cập nhật)
+    // 💾 Lưu sự kiện
     @PostMapping("/save")
     public String saveEvent(@ModelAttribute("event") Event event) {
         boolean isNew = (event.getId() == null);
         Event saved = eventRepo.save(event);
 
         if (isNew) {
-            activityService.log(
-                "Created event '" + saved.getTitle() + "'",
-                "/event/view/" + saved.getId(),
-                "calendar-event"          // icon tạo mới
-            );
+            activityService.log("Created event '" + saved.getTitle() + "'",
+                    "/event/view/" + saved.getId(), "calendar-event");
         } else {
-            activityService.log(
-                "Updated event '" + saved.getTitle() + "'",
-                "/event/view/" + saved.getId(),
-                "pencil-square"    // icon cập nhật
-            );
+            activityService.log("Updated event '" + saved.getTitle() + "'",
+                    "/event/view/" + saved.getId(), "pencil-square");
         }
 
         return "redirect:/event/all";
     }
 
-    // 👁️ Xem chi tiết sự kiện
+    // 👁️ Xem chi tiết
     @GetMapping("/view/{id}")
     public String viewEvent(@PathVariable("id") Long id, Model model) {
         Event event = eventRepo.findById(id)
@@ -127,7 +117,7 @@ public class EventController {
         return "event/event_view";
     }
 
-    // ✏️ Form chỉnh sửa sự kiện
+    // ✏️ Chỉnh sửa
     @GetMapping("/edit/{id}")
     public String editEvent(@PathVariable("id") Long id, Model model) {
         Event event = eventRepo.findById(id)
@@ -136,19 +126,38 @@ public class EventController {
         return "event/event_form";
     }
 
-    // ❌ Xóa sự kiện
+    // ❌ Xóa
     @GetMapping("/delete/{id}")
     public String deleteEvent(@PathVariable("id") Long id) {
         Event e = eventRepo.findById(id)
             .orElseThrow(() -> new IllegalArgumentException("Invalid event ID: " + id));
         eventRepo.deleteById(id);
 
-        activityService.log(
-            "Deleted event '" + e.getTitle() + "'",
-            "/event/all",
-            "calendar-event"             // icon xóa
-        );
+        activityService.log("Deleted event '" + e.getTitle() + "'",
+                "/event/all", "calendar-event");
 
         return "redirect:/event/all";
     }
+    @GetMapping("/su-kien")
+    public String showEventPublic(Model model) {
+        List<Event> events = eventRepo.findAll();
+
+        // Gắn status để dùng cho lọc giao diện
+        for (Event e : events) {
+            if ("Scheduled".equalsIgnoreCase(e.getStatus())) {
+                e.setStatus("upcoming");
+            } else if ("Completed".equalsIgnoreCase(e.getStatus())) {
+                e.setStatus("past");
+            } else {
+                e.setStatus("ongoing");
+            }
+        }
+
+        model.addAttribute("events", events);
+        model.addAttribute("page", "events");
+        model.addAttribute("pageTitle", "Sự kiện");
+        return "user/event/event";
+    }
+
+
 }

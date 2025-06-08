@@ -45,11 +45,11 @@ public class Event {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by_admin_id")
     private Admin createdByAdmin;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by_qtv_id")
     private QuanTriVien createdByQtv;
 
@@ -96,4 +96,15 @@ public class Event {
 
     public QuanTriVien getCreatedByQtv() { return createdByQtv; }
     public void setCreatedByQtv(QuanTriVien createdByQtv) { this.createdByQtv = createdByQtv; }
+
+    @Override
+    public String toString() {
+        return "Event{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", startDate=" + startDate +
+                ", startTime=" + startTime +
+                ", location='" + location + '\'' +
+                '}';
+    }
 }
